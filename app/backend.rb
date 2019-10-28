@@ -187,6 +187,7 @@ _EOS_
         (y,m,d)=_validate_date(date)
         return nil unless y
 
+        num=NKF.nkf('-w -Z4',num.to_s).to_i
         num=num.to_i
         return self.delete(email,date,true) if num<=0
 

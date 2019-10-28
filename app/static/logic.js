@@ -2,7 +2,7 @@
 // calendar.js
 //
 //
-// Time-stamp: <2019-10-28 17:49:57 zophos>
+// Time-stamp: <2019-10-29 06:45:13 zophos>
 //
 
 //
@@ -688,10 +688,10 @@ View.prototype._registorate_html=function()
 <div class='dialog'>
 <h2>新規登録</h2>
 <dl>
-<dt>メールアドレス</dt>
-<dd><input class='input' id='email'></input></dd>
 <dt class='name'>氏名</dt>
 <dd class='name'><input class='input' id='name'></input></dd>
+<dt>メールアドレス</dt>
+<dd><input class='input' id='email'></input></dd>
 <dt class='phone'>電話番号</dt>
 <dd class='phone'><input class='input' id='phone'></input></dd>
 <dt>パスワード</dt>
@@ -723,7 +723,7 @@ View.prototype._submit_html=function(date,number)
 </dl>
 <p id='login-message'></p>
 <p class='buttons'>
-<input class='button' id='button-submit' type='button' value='登録'></input>
+<input class='button' id='button-submit' type='button' value='送信'></input>
 <input class='button' id='button-cancel' type='button' value='キャンセル'></input>
 </p>
 </div>
@@ -733,7 +733,7 @@ View.prototype._submit_with_login_html=function(date,email='')
 {
     return `
 <div class='dialog'>
-<h2>日程と人数の登録</h2>
+<h2>日程および人数の登録</h2>
 <dl>
 <dt class='entry-date'>日付</dt>
 <dd class='entry-date'><span class='input' id='entry-date'>${date}</span></dd>
@@ -744,7 +744,7 @@ View.prototype._submit_with_login_html=function(date,email='')
 </dl>
 <ul class='tab'>
 <li class='tab on' id='dialog-tab-login'>ログイン</li>
-<li class='tab' id='dialog-tab-signup'>新規登録</li>
+<li class='tab' id='dialog-tab-signup'>新規代表者登録</li>
 </ul>
 <dl class='login' id='login-or-signup'>
 <dt class='name'>氏名</dt>
@@ -760,7 +760,7 @@ View.prototype._submit_with_login_html=function(date,email='')
 </dl>
 <p id='login-message'></p>
 <p class='buttons'>
-<input class='button' id='button-submit' type='button' value='登録'></input>
+<input class='button' id='button-submit' type='button' value='送信'></input>
 <input class='button' id='button-cancel' type='button' value='キャンセル'></input>
 </p>
 </div>
