@@ -2,7 +2,7 @@
 // calendar.js
 //
 //
-// Time-stamp: <2019-10-28 05:35:11 zophos>
+// Time-stamp: <2019-10-28 17:49:57 zophos>
 //
 
 //
@@ -125,6 +125,34 @@ Calendar.prototype.cell=function(date)
 	return this.cells[c_id];
     else
 	return null;
+}
+Calendar.prototype.set_cell_content=function(date,body)
+{
+    var el=this.cell(date);
+    if(!el)
+	return;
+    el.classList.remove('fixed');
+    el.removeAttribute('data-you');
+
+    var td=el.getElementsByTagName('td')[0]
+    if(!td)
+	return;
+
+    if('all' in body)
+	td.innerText=body['all'];
+    else{
+	td.innerText='';
+	return;
+    }
+
+    if('fixed' in body)
+	el.classList.add('fixed');
+
+    if('you' in body && body['you']>0){
+	td.setAttribute('class','you');
+	el.setAttribute('data-you',body['you']);
+    }
+
 }
 
 Calendar.prototype._build_month_header=function()
@@ -285,7 +313,7 @@ function View()
 	    view.draw_submit_dialog(date,number);
 	}
 	else
-	    view.draw_submit_with_registrate_dialog(date,number);
+	    view.draw_submit_with_login_dialog(date,localStorage.getItem('email')||'');
     }
     this.calendar.on_draw=function(year,month){
 	var y=year;
@@ -297,23 +325,7 @@ function View()
 		  return response.json();
 	      }).then((json)=>{
 		  Object.keys(json).forEach((k)=>{
-		      if(!json[k]["all"])
-			  return;
-		      var el=this.cell(k);
-		      if(!el)
-			  return;
-		      var td=el.getElementsByTagName('td')[0]
-		      if(!td)
-			  return;
-		      td.innerText=json[k]["all"]
-
-		      if('fixed' in json[k])
-			  el.classList.add('fixed');
-
-		      if('you' in json[k] && json[k]['you']>0){
-			  td.setAttribute('class','you');
-			  el.setAttribute('data-you',json[k]['you']);
-		      }
+		      this.set_cell_content(k,json[k]);
 		  },this);
 	      });
 
@@ -353,6 +365,7 @@ function View()
     this.loggedin=false;
     var email=localStorage.getItem('email');
     var cookie=CookieMonster();
+
     if(email && ('ssid' in cookie)){
 	const headers = {
 	    'Accept': 'application/json',
@@ -369,7 +382,6 @@ function View()
 		  if(response.ok)
 		      this.set_loggedin();
 		  else{
-		      document.cookie='ssid=; max-age=0';
 		      this.set_loggedout();
 		  }
 	      });
@@ -379,40 +391,13 @@ function View()
 
     this.calendar.draw();
 }
-View.prototype._update_calendar=function(json)
-{
-    Object.keys(json).forEach((k)=>{
-	if(!json[k]["all"])
-	    return;
-	var el=this.calender.cell(k);
-	if(!el)
-	    return;
-	var td=el.getElementsByTagName('td')[0]
-	if(!td)
-	    return;
-	td.innerText=json[k]["all"]
-	
-	if('fixed' in json[k])
-	    el.classList.add('fixed');
-	
-	if('you' in json[k]){
-	    if(json[k]['you']>0){
-		td.setAttribute('class','you');
-		el.setAttribute('data-you',json[k]['you']);
-	    }
-	    else{
-		td.removeAttribute('class');
-		el.removeAttribute('data-you');
-	    }
-	}
-    }
-}
 
 View.prototype.set_loggedin=function()
 {
     this.loggedin=true;
     document.getElementById('login-ctrl').setAttribute(
 	'class','loggedin');
+    this.calendar.draw();
 }
 View.prototype.set_loggedout=function()
 {
@@ -420,6 +405,7 @@ View.prototype.set_loggedout=function()
     document.cookie='ssid=; max-age=0';
     document.getElementById('login-ctrl').setAttribute(
 	'class','loggedout');
+    this.calendar.draw();
 }
 
 View.prototype.hide_dialog=function()
@@ -430,9 +416,7 @@ View.prototype.hide_dialog=function()
 }
 View.prototype.draw_login_dialog=function()
 {
-    var el=document.getElementById('overray')
-    el.innerHTML=this._login_html();
-    el.style.display='flex';
+    this._prepair_draw_dialog(this._login_html());
 
     var em=localStorage.getItem('email')
     if(em)
@@ -452,11 +436,11 @@ View.prototype.draw_login_dialog=function()
 					passwd:passwd})
 		  }).then((response)=>{
 		      if(response.ok){
+			  localStorage.setItem('email',email);
 			  this.hide_dialog();
 			  this.set_loggedin();
 		      }
 		      else{
-			  document.cookie='ssid=; max-age=0';
 			  document.getElementById('login-message').innerText=
 			      'ログインに失敗しました。';
 			  this.set_loggedout();
@@ -472,9 +456,7 @@ View.prototype.draw_login_dialog=function()
 }
 View.prototype.draw_registorate_dialog=function()
 {
-    var el=document.getElementById('overray')
-    el.innerHTML=this._registorate_html();
-    el.style.display='flex';
+    this._prepair_draw_dialog(this._registorate_html());
 
     var el=document.getElementById('button-submit')
     el.addEventListener(
@@ -505,9 +487,17 @@ View.prototype.draw_registorate_dialog=function()
 			  this.set_loggedin();
 		      }
 		      else{
-			  document.cookie='ssid=; max-age=0';
+			  var message='登録できませんでした。';
+			  switch(response.status){
+			  case 400:
+			      message='必要項目が記入されていません。';
+			      break;
+			  case 409:
+			      message='既に登録されています。';
+			      break;
+			  }
 			  document.getElementById('login-message').innerText=
-			      '登録できませんでした。';
+			      message;
 			  this.set_loggedout();
 		      }
 		  });
@@ -521,18 +511,10 @@ View.prototype.draw_registorate_dialog=function()
 }
 View.prototype.draw_submit_dialog=function(date,number)
 {
-    var y=date.slice(0,4)
-    var m=date.slice(4,6)
-    var d=date.slice(-2)
-    var _date=new Date(y,m,d)
-    var wday=this.calendar._WDAY[_date.getDay()]
+    this._prepair_draw_dialog(this._submit_html(this._build_date_str(date),
+						number));
 
-    var date_str=`${y}/${m}/${d} (${wday.capitalize()}.)`
-    var el=document.getElementById('overray')
-    el.innerHTML=this._submit_html(date_str,number);
-    el.style.display='flex';
-
-   var el=document.getElementById('button-submit')
+    el=document.getElementById('button-submit')
     el.addEventListener(
 	'click',
 	(event)=>{
@@ -547,13 +529,21 @@ View.prototype.draw_submit_dialog=function(date,number)
 		      if(response.ok){
 			  this.hide_dialog();
 			  this.set_loggedin();
+			  
+			  return response.json();
 		      }
 		      else{
 			  document.cookie='ssid=; max-age=0';
 			  document.getElementById('login-message').innerText=
 			      '登録できませんでした。';
 			  this.set_loggedout();
+
+			  return {};
 		      }
+		  }).then((json)=>{
+		      Object.keys(json).forEach((k)=>{
+			  document.view.calendar.set_cell_content(k,json[k]);
+		      });
 		  });
 	});
 
@@ -562,6 +552,114 @@ View.prototype.draw_submit_dialog=function(date,number)
 			(event)=>{
 			    this.hide_dialog.call(this);
 			});
+}
+
+View.prototype.draw_submit_with_login_dialog=function(date,email='')
+{
+    this._prepair_draw_dialog(
+	this._submit_with_login_html(this._build_date_str(date),
+				     email));
+
+    if(email)
+	this._set_dialog_as_login();
+    else
+	this._set_dialog_as_signup();
+
+    var el=document.getElementById('dialog-tab-login');
+    el.addEventListener(
+	'click',
+	(event)=>{
+	    document.view._set_dialog_as_login();
+	});
+    el=document.getElementById('dialog-tab-signup');
+    el.addEventListener(
+	'click',
+	(event)=>{
+	    document.view._set_dialog_as_signup();
+	});
+
+    el=document.getElementById('button-submit')
+    el.addEventListener(
+	'click',
+	(event)=>{
+	    var req_body={
+		num:document.getElementById('entry-num').value,
+		note:document.getElementById('note').value,
+		email:document.getElementById('email').value,
+		passwd:document.getElementById('password').value};
+
+	    if(document.view._submit_with_signup){
+		if(req_body['passwd']!=document.getElementById('password2').value){
+		    document.getElementById('login-message').innerText=
+			'パスワードが一致しません。';
+		    return;
+		}
+		req_body['name']=document.getElementById('name').value;
+		req_body['phone']=document.getElementById('phone').value;
+	    }
+	    fetch(`./api/${date}`,
+		  {method:'POST',
+		   headers:new Headers({'Accept':'application/json',
+					'Content-Type':'application/json'}),
+		   body:JSON.stringify(req_body)
+		  }).then((response)=>{
+		      if(response.ok){
+			  localStorage.setItem('email',req_body['email']);
+			  this.hide_dialog();
+			  this.set_loggedin();
+			  
+			  return response.json();
+		      }
+		      else{
+			  var message='登録に失敗しました。';
+			  switch(response.status){
+			  case 400:
+			      message='必要項目が記入されていません。';
+			      break;
+			  case 401:
+			      message='ログインに失敗しました。';
+			      break;
+			  case 409:
+			      message='既に登録されています。';
+			      break;
+			  }
+			  document.getElementById('login-message').innerText=
+			      message;
+			  this.set_loggedout();
+
+			  return {};
+		      }
+		  }).then((json)=>{
+		      Object.keys(json).forEach((k)=>{
+			  document.view.calendar.set_cell_content(k,json[k]);
+		      });
+		  });
+	});
+
+    el=document.getElementById('button-cancel')
+    el.addEventListener('click',
+			(event)=>{
+			    this.hide_dialog.call(this);
+			});
+}
+
+View.prototype._prepair_draw_dialog=function(html)
+{
+    var el=document.getElementById('overray')
+    el.innerHTML=html;
+    el.style.display='flex';
+}
+
+
+View.prototype._build_date_str=function(date)
+{
+    var y=date.slice(0,4);
+    var m=date.slice(4,6);
+    var d=date.slice(-2);
+    var _date=new Date(y,m,d);
+    var wday=this.calendar._WDAY[_date.getDay()];
+
+    return `${y}/${m}/${d} (${wday.capitalize()}.)`;
 }
 
 View.prototype._login_html=function()
@@ -631,26 +729,34 @@ View.prototype._submit_html=function(date,number)
 </div>
 `;
 }
-View.prototype._submit_with_registrate_html=function(number)
+View.prototype._submit_with_login_html=function(date,email='')
 {
     return `
 <div class='dialog'>
 <h2>日程と人数の登録</h2>
 <dl>
 <dt class='entry-date'>日付</dt>
-<dd class='entry-date'><span class='input' id='entry-date'></span></dd>
+<dd class='entry-date'><span class='input' id='entry-date'>${date}</span></dd>
 <dt class='entry-num'>人数</dt>
-<dd class='entry-num'><input class='input' id='entry-num' value='${number}'></input></dd>
-<dt>メールアドレス</dt>
-<dd><input class='input' id='email'></input></dd>
+<dd class='entry-num'><input class='input' id='entry-num' value='1'></input></dd>
+<dt class='note'>備考</dt>
+<dd class='note'><input class='input' id='note'></input></dd>
+</dl>
+<ul class='tab'>
+<li class='tab on' id='dialog-tab-login'>ログイン</li>
+<li class='tab' id='dialog-tab-signup'>新規登録</li>
+</ul>
+<dl class='login' id='login-or-signup'>
 <dt class='name'>氏名</dt>
 <dd class='name'><input class='input' id='name'></input></dd>
+<dt>メールアドレス</dt>
+<dd><input class='input' id='email' value='${email}'></input></dd>
 <dt class='phone'>電話番号</dt>
 <dd class='phone'><input class='input' id='phone'></input></dd>
 <dt>パスワード</dt>
 <dd><input class='input' id='password' type='password'></input></dd>
-<dt>パスワード確認</dt>
-<dd><input class='input' id='password2' type='password'></input></dd>
+<dt class='password2'>パスワード確認</dt>
+<dd class='password2'><input class='input' id='password2' type='password'></input></dd>
 </dl>
 <p id='login-message'></p>
 <p class='buttons'>
@@ -661,6 +767,32 @@ View.prototype._submit_with_registrate_html=function(number)
 `;
 }
 
+View.prototype._set_dialog_as_login=function()
+{
+    var el=document.getElementById('dialog-tab-login');
+    if(!el)
+	return;
+    el.classList.add('on');
+    el=document.getElementById('dialog-tab-signup');
+    el.classList.remove('on');
+    el=document.getElementById('login-or-signup');
+    el.setAttribute('class','login');
+
+    this._submit_with_signup=false;
+}
+View.prototype._set_dialog_as_signup=function()
+{
+    var el=document.getElementById('dialog-tab-login');
+    if(!el)
+	return;
+    el.classList.remove('on');
+    el=document.getElementById('dialog-tab-signup');
+    el.classList.add('on');
+    el=document.getElementById('login-or-signup');
+    el.setAttribute('class','signup');
+
+    this._submit_with_signup=true;
+}
 
 window.onload=function(){
     document.view=new View();

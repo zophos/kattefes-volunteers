@@ -145,11 +145,12 @@ _EOS_
                  "%04d%02d%02d"%[y,m+1,31]
            end
 
+        ret={}
+
         sql=<<_EOS_
 select date,sum(number) as num from schedules
 where (date>=? and date<=?) group by date order by date
 _EOS_
-        ret={}
         @db.fetch(sql,from,to){|row|
             ret[row[:date]]={'all'=>row[:num]}
         }
@@ -194,7 +195,7 @@ insert or replace into schedules values (?,?,?,?,?)
 _EOS_
         @db.fetch(sql,date,email,num,note,Time.now.localtime.to_s).all
 
-        self.get(y*100+m,email)
+        _get_adate(date,email)
     end
 
     def delete(ssid,date,ssid_as_email=false)
@@ -209,7 +210,7 @@ delete from schedules where (date=? and email=?)
 _EOS_
         @db.fetch(sql,date,email).all
 
-        self.get(y*100+m,email)
+        _get_adate(date,email)
     end
 
     private
@@ -248,5 +249,38 @@ _EOS_
 
     def _validate_email(email)
         email=~/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+    end
+
+    def _get_date(date,email)
+        ret={}
+
+        sql=<<_EOS_
+select date,sum(number) as num from schedules
+where date=? group by date
+_EOS_
+        @db.fetch(sql,from,to){|row|
+            ret[row[:date]]={'all'=>row[:num]}
+        }
+
+        sql=<<_EOS_
+select date from fixed_schedules 
+where (date=? and fixed=1)
+_EOS_
+        @db.fetch(sql,from,to){|row|
+            begin
+                ret[row[:date]]['fixed']=true
+            rescue NoMethodError
+            end
+        }
+
+        sql=<<_EOS_
+select date, number as num from schedules
+where (date=? and email=?) order by date
+_EOS_
+        @db.fetch(sql,from,to,email){|row|
+            ret[row[:date]]['you']=row[:num]
+        }
+
+        return ret
     end
 end

@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# coding: cp932
 #
 #
 
@@ -15,6 +16,25 @@ require 'json'
 
 configure do
     set :db, DB.new('sqlite://./db/main.db',ENV['DB_KEY'])
+end
+
+helpers do
+    def protect!
+        unless authorized?
+            response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
+            throw(:halt, [401, "Not authorized\n"])
+        end
+    end
+
+    def authorized?
+        @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+        username = ENV['BASIC_AUTH_USERNAME']
+        password = ENV['BASIC_AUTH_PASSWORD']
+        @auth.provided? &&
+            @auth.basic? &&
+            @auth.credentials &&
+            @auth.credentials == [username, password]
+    end
 end
 
 set :public_folder, File.dirname(__FILE__) + '/static'
@@ -69,6 +89,11 @@ end
 
 post '/api/member' do
     params=JSON.parse(request.body.read)
+
+    ['email','name','phone','passwd'].each{|k|
+            return 400 unless keys.include?(k)
+    }
+
     ssid=settings.db.reg_member(params['email'],
                                 params['name'],
                                 params['phone'],
@@ -80,7 +105,7 @@ post '/api/member' do
                                    :path=>'/'}
         return 200
     else
-        return 401
+        return 409
     end
 end
 
@@ -110,13 +135,25 @@ post '/api/:cal_id' do
     return 400 unless keys.include?('num')
 
     ssid=cookies[:ssid]
-    $stderr<<cookies.inspect<<"\n"
     unless(ssid)
-        ['email','name','phone','passwd'].each{|k|
-            return 409 unless keys.include?(k)
+        ['email','passwd'].each{|k|
+            return 401 unless keys.include?(k)
         }
-        ssid=settings.db.reg_member(email,name,phone,passwd,request.ip)
-        return 409 unless ssid
+        ssid=settings.db.login(params['email'],
+                               params['passwd'],
+                               request.ip)
+        
+        unless(ssid)
+            ['name','phone'].each{|k|
+                return 400 unless keys.include?(k)
+            }
+            ssid=settings.db.reg_member(params['email'],
+                                        params['name'],
+                                        params['phone'],
+                                        params['passwd'],
+                                        request.ip)
+            return 409 unless ssid
+        end
     end
 
     data=settings.db.post(ssid,
@@ -147,7 +184,12 @@ delete '/api/:cal_id' do
     JSON.dump(data)
 end
 
+get '/adim/:cal_id' do
+    protect!
     
+    
+end
+
 get '/' do
     send_file File.join(settings.public_folder, 'index.html')
 end
