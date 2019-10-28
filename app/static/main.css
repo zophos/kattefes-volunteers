@@ -2,7 +2,7 @@
 // Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
 // kattefes@officebarbecue.jp
 //
-// Time-stamp: "2019-10-29 06:13:45 zophos"
+// Time-stamp: "2019-10-29 06:39:29 zophos"
 */
 html,
 body{
@@ -138,7 +138,7 @@ table.cal td table.fixed td{
     appearance: none;
 }
 #overray .dialog{
-    width:50%;
+    width:55%;
     font-size:large;
     padding:0 3em 3em;
     background-color:#f0f0f0;
@@ -149,21 +149,20 @@ table.cal td table.fixed td{
 #overray .dialog h2{
     text-align:center;
 }
+#overray .dialog dl{
+    margin:0;
+    padding:0;
+    width:100%;
+}
 #overray .dialog dt{
     float:left;
     clear:left;
     padding:0.5em;
-    width:8em;
+    width:7em;
+    font-weight:bold;
 }
 #overray .dialog dd{
-    margin:1em 0 1em 10em;
-}
-#overray .dialog.login dt.name,
-#overray .dialog.login dd.name,
-#overray .dialog.login dt.phone,
-#overray .dialog.login dd.phone
-{
-    display:none;
+    margin:1em 0 1em 8.5em;
 }
 #overray .dialog span.input,
 #overray .dialog input.input{
@@ -185,6 +184,7 @@ table.cal td table.fixed td{
 #login-message{
     margin:2em auto;
     padding:2em 1em;
+    color:red;
 }
 #overray .dialog input.button{
     display:inline-block;
@@ -197,4 +197,30 @@ table.cal td table.fixed td{
     border-radius:5px;
     background-color:#707070;
     box-shadow:1px 1px 2px rgba(0,0,0,0.5);
+}
+#overray .dialog ul.tab{
+    display:flex;
+    margin:2em auto 0;
+    padding:.5em;
+    justify-content: center;
+}
+#overray .dialog ul.tab li.tab{
+    display:inline-block;
+    margin:1em .15em 0;
+    padding:.5em;
+    border:solid 2px #a0a0a0;
+    border-radius:5px;
+    background-color:#f0f0f0;
+    box-shadow:2px 1px 1px rgba(0,0,0,0.5);
+}
+#overray .dialog ul.tab li.tab.on{
+    border-color:#a0a0a0;
+    background-color:#90c0a0;
+    box-shadow:2px 1px 1px rgba(0,0,0,0.5) inset;
+}
+#overray .dialog dl.login .name,
+#overray .dialog dl.login .phone,
+#overray .dialog dl.login .password2
+{
+    display:none;
 }
