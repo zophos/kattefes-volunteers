@@ -1,0 +1,200 @@
+/*
+// Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
+// kattefes@officebarbecue.jp
+//
+// Time-stamp: "2019-10-29 06:13:45 zophos"
+*/
+html,
+body{
+    margin:0;
+    padding:0 3.5%;
+}
+h1{
+    margin:2em auto;
+    text-align:center;
+}
+#login-ctrl{
+    width:100%;
+    font-size:large;
+    margin:2em 0;
+    text-align:right;
+}
+#login-ctrl.loggedin #do-login,
+#login-ctrl.loggedin #do-signup{
+    display:none;
+}
+#login-ctrl.loggedout #do-edit,
+#login-ctrl.loggedout #do-logout{
+    display:none;
+}
+div.cal{
+    width:100%;
+    margin:auto;
+}
+table,
+table th,
+table td{
+    border-collapse:collapse;
+}
+table.cal{
+    font-size:x-large;
+    margin:0 auto;
+    width:100%;
+}
+table.cal th,
+table.cal td{
+    border:1px #82906f solid;
+    margin:0;
+    padding:0;
+}
+table.cal th{
+    margin:auto;text-align:center;
+    text-align:center;
+    font-weight:bold;
+}
+table.cal tr.month th{
+    font-size:150%;
+    height:2.5em;
+    /*padding:1.5em auto;*/
+    border:1px #82906f solid;
+    background-color:#82906f;
+    color:white;
+}
+span.cal-month-button{
+    display:inline-block;
+    margin:auto 1em;
+}
+#cal-month-current{
+    padding:0;
+    width:7em;
+    text-align:center;
+}
+table.cal tr.wday th{
+    background-color:#f0f0f0;
+    padding:.25em;
+    width:5em;
+}
+table.day,
+table.day th,
+table.day td{
+    margin:0;
+    padding:.25em;
+    width:100%;
+    border:none;
+}
+table.day th{
+    text-align:left;
+}
+table.day td{
+    text-align:center;
+    width:5em;
+    height:5em;
+}
+table.day td.you:after{
+    font-family:"Font Awesome 5 Free";
+    font-weight:900;
+    content: " \f0f3";
+    color:orange;
+}
+table.cal tr.wday th.sat,
+table.cal td.sat th{
+    background-color:#d0f0d0;
+}
+table.cal tr.wday th.sun,
+table.cal td.sun th,
+table.cal td table.nhd th{
+    background-color:#f0d0d0;
+}
+table.cal td table.oom th,
+table.cal td table.fixed th{
+    background-color:#d0d0d0;
+    color:#909090;
+}
+table.cal td table.oom td,
+table.cal td table.fixed td{
+    background-color:#e0e0e0;
+    color:#909090;
+}
+#overray{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    display:none;
+    justify-content: center;
+    align-items:center;
+    background-color:rgba(255,255,255,0.5);
+}
+#overray .dialog input{
+    margin:0;
+    padding:0;
+    background:none;
+    border:none;
+    border-radius: 0;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+#overray .dialog{
+    width:50%;
+    font-size:large;
+    padding:0 3em 3em;
+    background-color:#f0f0f0;
+    border-radius:10px;
+    border:solid 5px rgba(120,120,120,0.75);
+    box-shadow:3px 3px 3px rgba(0,0,0,0.5);
+}
+#overray .dialog h2{
+    text-align:center;
+}
+#overray .dialog dt{
+    float:left;
+    clear:left;
+    padding:0.5em;
+    width:8em;
+}
+#overray .dialog dd{
+    margin:1em 0 1em 10em;
+}
+#overray .dialog.login dt.name,
+#overray .dialog.login dd.name,
+#overray .dialog.login dt.phone,
+#overray .dialog.login dd.phone
+{
+    display:none;
+}
+#overray .dialog span.input,
+#overray .dialog input.input{
+    display:inline-block;
+    font-size:100%;
+    width:95%;
+    height:2.5em;
+    padding:0.25em 1em;
+    vertical-align:middle;
+}
+#overray .dialog input.input{
+    background-color:white;
+    border:2px solid gray;
+    border-radius:5px;
+}
+#overray .dialog p.buttons{
+    text-align:center;
+}
+#login-message{
+    margin:2em auto;
+    padding:2em 1em;
+}
+#overray .dialog input.button{
+    display:inline-block;
+    font-size:100%;
+    font-weight:bold;
+    margin:2em 1em 0;
+    padding:1em;
+    color:white;
+    border:2px solid #a0a0a0;
+    border-radius:5px;
+    background-color:#707070;
+    box-shadow:1px 1px 2px rgba(0,0,0,0.5);
+}
