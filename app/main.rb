@@ -1,21 +1,22 @@
 #!/usr/bin/ruby
-# coding: cp932
 #
 #
 
 #
-# store DB access key and hide it from process title
+# hide passwords from process title
 #
 Process.setproctitle('sinatra-app')
 
 require 'sinatra'
 require 'sinatra/cookies'
 require 'sinatra/reloader'
-require './backend'
 require 'json'
+require './backend'
 
 configure do
-    set :db, DB.new('sqlite://./db/main.db',ENV['DB_KEY'])
+    set :db, DB.new('sqlite://'+File.dirname(__FILE__)+'/db/main.db',
+                    ENV['DB_KEY'])
+    set :public_folder, File.dirname(__FILE__) + '/static'
 end
 
 helpers do
@@ -37,7 +38,6 @@ helpers do
     end
 end
 
-set :public_folder, File.dirname(__FILE__) + '/static'
 
 post '/api/login' do
     params=JSON.parse(request.body.read)
@@ -48,6 +48,7 @@ post '/api/login' do
                                    :path=>'/'}
         return 200
     else
+        sleep(3)
         return 401
     end
 end
@@ -72,6 +73,7 @@ post '/api/ssid' do
                                    :path=>'/'}
         return 200
     else
+        sleep(3)
         return 401
     end
 
@@ -90,6 +92,7 @@ end
 post '/api/member' do
     params=JSON.parse(request.body.read)
 
+    keys=params.keys
     ['email','name','phone','passwd'].each{|k|
             return 400 unless keys.include?(k)
     }
@@ -105,6 +108,7 @@ post '/api/member' do
                                    :path=>'/'}
         return 200
     else
+        sleep(3)
         return 409
     end
 end
@@ -145,14 +149,20 @@ post '/api/:cal_id' do
         
         unless(ssid)
             ['name','phone'].each{|k|
-                return 400 unless keys.include?(k)
+                unless keys.include?(k)
+                    sleep(3)
+                    return 401
+                end
             }
             ssid=settings.db.reg_member(params['email'],
                                         params['name'],
                                         params['phone'],
                                         params['passwd'],
                                         request.ip)
-            return 409 unless ssid
+            unless ssid
+                sleep(3)
+                return 409 
+            end
         end
     end
 
@@ -175,7 +185,10 @@ delete '/api/:cal_id' do
     return 401 unless cookie.kas_key?(:ssid)
 
     data=settings.db.delete(cookie[:ssid],params['cal_id'])
-    return 400 unless date
+    unless data
+        sleep(3)
+        return 400
+    end
 
     response.set_cookie :ssid,{:value=>ssid,
                                :max_age=>"#{DB::SESSION_EXPIRE_SEC}",

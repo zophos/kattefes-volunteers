@@ -148,22 +148,12 @@ _EOS_
         ret={}
 
         sql=<<_EOS_
-select date,sum(number) as num from schedules
-where (date>=? and date<=?) group by date order by date
+select * from aggregated_schedules where (date>=? and date<=?)
 _EOS_
         @db.fetch(sql,from,to){|row|
-            ret[row[:date]]={'all'=>row[:num]}
-        }
-
-        sql=<<_EOS_
-select date from fixed_schedules
-where (date>=? and date<=? and fixed=1) order by date
-_EOS_
-        @db.fetch(sql,from,to){|row|
-            begin
-                ret[row[:date]]['fixed']=true
-            rescue NoMethodError
-            end
+            ret[row[:date]]={
+                'all'=>row[:num],
+                'status'=>row[:status]}
         }
 
         email=self.ssid2email(ssid)
@@ -173,7 +163,10 @@ select date, number as num from schedules
 where (date>=? and date<=? and email=?) order by date
 _EOS_
             @db.fetch(sql,from,to,email){|row|
-                ret[row[:date]]['you']=row[:num]
+                begin
+                    ret[row[:date]]['you']=row[:num]
+                rescue NoMethodError
+                end
             }
         end
 
@@ -194,7 +187,10 @@ _EOS_
         sql=<<_EOS_
 insert or replace into schedules values (?,?,?,?,?)
 _EOS_
-        @db.fetch(sql,date,email,num,note,Time.now.localtime.to_s).all
+        begin
+            @db.fetch(sql,date,email,num,note,Time.now.localtime.to_s).all
+        rescue Sequel::DatabaseError
+        end
 
         _get_adate(date,email)
     end
@@ -209,7 +205,10 @@ _EOS_
         sql=<<_EOS_
 delete from schedules where (date=? and email=?)
 _EOS_
-        @db.fetch(sql,date,email).all
+        begin
+            @db.fetch(sql,date,email).all
+        rescue Sequel::DatabaseError
+        end
 
         _get_adate(date,email)
     end
@@ -252,33 +251,22 @@ _EOS_
         email=~/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
     end
 
-    def _get_date(date,email)
+    def _get_adate(date,email)
         ret={}
 
         sql=<<_EOS_
-select date,sum(number) as num from schedules
-where date=? group by date
+select * from aggregated_schedules where date=?
 _EOS_
-        @db.fetch(sql,from,to){|row|
-            ret[row[:date]]={'all'=>row[:num]}
-        }
-
-        sql=<<_EOS_
-select date from fixed_schedules 
-where (date=? and fixed=1)
-_EOS_
-        @db.fetch(sql,from,to){|row|
-            begin
-                ret[row[:date]]['fixed']=true
-            rescue NoMethodError
-            end
+        @db.fetch(sql,date){|row|
+            ret[row[:date]]={'all'=>row[:num],
+                             'status'=>row[:status]}
         }
 
         sql=<<_EOS_
 select date, number as num from schedules
 where (date=? and email=?) order by date
 _EOS_
-        @db.fetch(sql,from,to,email){|row|
+        @db.fetch(sql,date,email){|row|
             ret[row[:date]]['you']=row[:num]
         }
 

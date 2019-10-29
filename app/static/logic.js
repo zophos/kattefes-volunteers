@@ -2,7 +2,7 @@
 // calendar.js
 //
 //
-// Time-stamp: <2019-10-29 06:45:13 zophos>
+// Time-stamp: <2019-10-29 18:59:15 zophos>
 //
 
 //
@@ -131,7 +131,9 @@ Calendar.prototype.set_cell_content=function(date,body)
     var el=this.cell(date);
     if(!el)
 	return;
-    el.classList.remove('fixed');
+    el.classList.remove('open');
+    el.classList.remove('closed');
+    el.classList.remove('canceld');
     el.removeAttribute('data-you');
 
     var td=el.getElementsByTagName('td')[0]
@@ -145,8 +147,8 @@ Calendar.prototype.set_cell_content=function(date,body)
 	return;
     }
 
-    if('fixed' in body)
-	el.classList.add('fixed');
+    if('status' in body)
+	el.classList.add(body['status']);
 
     if('you' in body && body['you']>0){
 	td.setAttribute('class','you');
@@ -303,6 +305,12 @@ function View()
 			       {'class':'cal'});
 
     this.calendar.on_cell_click=function(event,cell){
+	var c_list=cell.classList;
+	if(c_list.contains('oom') ||
+	   c_list.contains('closed') ||
+	   c_list.contains('canceled'))
+	    return;
+
 	var date=cell.id.replace(`${this.id_prefix}-d`,'');
 	var view=document.view;
 	var number=1;
@@ -313,7 +321,9 @@ function View()
 	    view.draw_submit_dialog(date,number);
 	}
 	else
-	    view.draw_submit_with_login_dialog(date,localStorage.getItem('email')||'');
+	    view.draw_submit_with_login_dialog(
+		date,
+		localStorage.getItem('email')||'');
     }
     this.calendar.on_draw=function(year,month){
 	var y=year;
@@ -333,7 +343,9 @@ function View()
 	    Object.keys(this.cells).forEach((c_id)=>{
 		var el=this.cells[c_id];
 		var c_list=el.classList;
-		if(c_list.contains('oom') || c_list.contains('fixed'))
+		if(c_list.contains('oom') ||
+		   c_list.contains('closed') ||
+		   c_list.contains('canceled'))
 		    return;
 
 		el.addEventListener('click',
