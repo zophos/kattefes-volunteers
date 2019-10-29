@@ -17,6 +17,7 @@ configure do
     set :db, DB.new('sqlite://'+File.dirname(__FILE__)+'/db/main.db',
                     ENV['DB_KEY'])
     set :public_folder, File.dirname(__FILE__) + '/static'
+    set :mount_point,''
 end
 
 helpers do
@@ -39,7 +40,7 @@ helpers do
 end
 
 
-post '/api/login' do
+post "#{settings.mount_point}/api/login" do
     params=JSON.parse(request.body.read)
     ssid=settings.db.login(params['email'],params['passwd'],request.ip)
     if(ssid)
@@ -53,7 +54,7 @@ post '/api/login' do
     end
 end
 
-get '/api/logout' do
+get "#{settings.mount_point}/api/logout" do
     settings.db.logout(cookies[:ssid])
     if(cookies[:ssid])
         response.set_cookie :ssid,{:value=>"",
@@ -64,7 +65,7 @@ get '/api/logout' do
     return 200
 end
 
-post '/api/ssid' do
+post "#{settings.mount_point}/api/ssid" do
     params=JSON.parse(request.body.read)
     ssid=settings.db.validate_session(cookies[:ssid],params['email'])
     if(ssid)
@@ -89,7 +90,7 @@ get '/api/reset' do
 end
 =end
 
-post '/api/member' do
+post "#{settings.mount_point}/api/member" do
     params=JSON.parse(request.body.read)
 
     keys=params.keys
@@ -113,7 +114,7 @@ post '/api/member' do
     end
 end
 
-get '/api/:cal_id' do
+get "#{settings.mount_point}/api/:cal_id" do
     return 400 if params['cal_id']!~/^\d{6}$/
 
     data=settings.db.get(params['cal_id'],cookies[:ssid])
@@ -129,7 +130,7 @@ get '/api/:cal_id' do
     JSON.dump(data)+"\n"
 end
 
-post '/api/:cal_id' do
+post "#{settings.mount_point}/api/:cal_id" do
     cal_id=params['cal_id']
     return 400 unless cal_id=~/^\d{8}$/
 
@@ -180,7 +181,7 @@ post '/api/:cal_id' do
     JSON.dump(data)
 end
 
-delete '/api/:cal_id' do
+delete "#{settings.mount_point}api/:cal_id" do
     return 400 if params['cal_id']!~/^\d{8}$/
     return 401 unless cookie.kas_key?(:ssid)
 
@@ -197,12 +198,24 @@ delete '/api/:cal_id' do
     JSON.dump(data)
 end
 
-get '/adim/:cal_id' do
+
+get "#{settings.mount_point}/admin/list" do
     protect!
     
-    
+
+    content_type :json
+    JSON.dump(data)
 end
 
-get '/' do
+get "#{settings.mount_point}/admin/" do
+    protect!
+    
+    send_file File.join(settings.public_folder, 
+                        'admin',
+                        'index.html')
+end
+
+
+get "#{settings.mount_point}/" do
     send_file File.join(settings.public_folder, 'index.html')
 end

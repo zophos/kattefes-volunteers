@@ -47,23 +47,32 @@ create table date_statuses (
 -- Views
 --
 create view aggregated_schedules as
- select schedules.date as date ,sum(number) as num,description as status
- from schedules
-  left outer join date_statuses on schedules.date=date_statuses.date
-  left outer join date_status_codes
+ select schedules.date as date, sum(number) as num, description as status
+  from schedules
+ left outer join date_statuses on schedules.date=date_statuses.date
+ left outer join date_status_codes
    on ifnull(date_statuses.status_code,0)=date_status_codes.status_code
  group by schedules.date order by date;
+
+create view schedules_with_memberinfo as
+  select schedules.date as date, schedules.email as email,
+   name, number as num, phone, note from schedules
+  left outer join members on schedules.email=members.email
+  order by date;
+
+create view combined_schedules as
+ select schedules_with_memberinfo.date as date,email, name,
+  schedules_with_memberinfo.num as num, phone, note, status
+  from schedules_with_memberinfo
+ left outer join aggregated_schedules
+  on schedules_with_memberinfo.date=aggregated_schedules.date
+ order by date;
 
 
 ------------------------------------------------------------------------
 --
 -- Triggers
 --
-
---
--- for members
---
-
 
 --
 -- for sessions

@@ -213,6 +213,62 @@ _EOS_
         _get_adate(date,email)
     end
 
+    def admin_list(from=nil,
+                   to=nil,
+                   with_closed=false)
+        cond=[]
+        c_value=[]
+        if(from)
+            (y,m,d)=_validate_date(from)
+            unless(y)
+                (y,m)=_validate_month(from)
+                d=1
+            end
+            if(y)
+                cond.push('date>=?')
+                c_value.push("%04d%02d%02d"%[y,m,d])
+            end
+        end
+        if(to)
+            (y,m,d)=_validate_date(to)
+            unless(y)
+                (y,m)=_validate_month(to)
+                d=31
+            end
+            if(y)
+                cond.push('date<=?')
+                c_value.push("%04d%02d%02d"%[y,m,d])
+            end
+        end
+        unless(with_closed)
+            cond.push('status=?')
+            c_value.push('open')
+        end
+
+        where="where #{cond.join(' and ')}" unless(cond.empty?)
+
+        ret={}
+        sql=<<_EOS_
+select * from combined_schedules #{where}
+_EOS_
+        @db.fetch(sql,*c_value){|row|
+            ret[row[:date]]||={
+                'status'=>row[:status],
+                'num'=>0,
+                'members'=[]
+            }
+            ret[row[:date]]['num']+=row[:num]
+            ret[row[:date]]['members'].push(
+                {'email'=>row[:email],
+                 'name'=>row[:name],
+                 'num'=>row[:num],
+                 'phone'=>row[:phone],
+                 'note'=>row[:note]})
+        }
+
+        return ret
+    end
+
     private
     def _hash(str)
         OpenSSL::Digest::SHA256.hexdigest(str)
