@@ -2,7 +2,7 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-10-30 16:55:39 zophos>
+// Time-stamp: <2019-10-30 22:36:57 zophos>
 //
 
 function View()
@@ -15,7 +15,15 @@ function View()
 	document.view.draw_detail_dialog(date);
     }
 
+    this._RELOAD_DURATION=60000; // 1min
+    this._reload_timer=null;
+
     this.calendar.on_draw=function(year,month){
+	if(document.view && document.view._reload_timer){
+	    clearTimeout(document.view._reload_timer);
+	    document.view._reload_timer=null;
+	}
+
 	var y=year;
 	var m=('0'+(month+1)).slice(-2);
 
@@ -37,6 +45,12 @@ function View()
 					this.on_cell_click.call(this,event,el);
 				    });
 	    },this)
+	}
+
+	if(document.view){
+	    document.view._reload_timer=
+	    setTimeout(document.view.calendar.draw.bind(document.view.calendar),
+		       document.view._RELOAD_DURATION);
 	}
     }
 

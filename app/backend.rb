@@ -42,7 +42,7 @@ _EOS_
         name=name.to_s.strip
         return nil if name.empty?
 
-        phone=NKF.nkf('-w -Z4',phone.to_s).gsub('-','')
+        phone=NKF.nkf('-w -Z',phone.to_s).gsub('-','')
         return nil unless phone=~/^\d+$/
 
         passwd=passwd.to_s.strip

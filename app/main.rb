@@ -9,7 +9,7 @@ Process.setproctitle('sinatra-app')
 
 require 'sinatra'
 require 'sinatra/cookies'
-require 'sinatra/reloader'
+#require 'sinatra/reloader'
 require 'json'
 require './backend'
 
@@ -44,9 +44,10 @@ post "#{settings.mount_point}/api/login" do
     params=JSON.parse(request.body.read)
     ssid=settings.db.login(params['email'],params['passwd'],request.ip)
     if(ssid)
-        response.set_cookie :ssid,{:value => ssid,
-                                   :max_age => "#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>"#{settings.mount_point}/"}
+        response.set_cookie :ssid,{:value=>ssid,
+                                   :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
+                                   :path=>"#{settings.mount_point}/",
+                                   :secure=>true}
         return 200
     else
         sleep(3)
@@ -59,7 +60,8 @@ get "#{settings.mount_point}/api/logout" do
     if(cookies[:ssid])
         response.set_cookie :ssid,{:value=>"",
                                    :max_age=>"0",
-                                   :path=>"#{settings.mount_point}/"}
+                                   :path=>"#{settings.mount_point}/",
+                                   :secure=>true}
     end
 
     return 200
@@ -69,9 +71,10 @@ post "#{settings.mount_point}/api/ssid" do
     params=JSON.parse(request.body.read)
     ssid=settings.db.validate_session(cookies[:ssid],params['email'])
     if(ssid)
-        response.set_cookie :ssid,{:value => ssid,
-                                   :max_age => "#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>"#{settings.mount_point}/"}
+        response.set_cookie :ssid,{:value=>ssid,
+                                   :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
+                                   :path=>"#{settings.mount_point}/",
+                                   :secure=>true}
         return 200
     else
         sleep(3)
@@ -106,7 +109,8 @@ post "#{settings.mount_point}/api/member" do
     if(ssid)
         response.set_cookie :ssid,{:value => ssid,
                                    :max_age => "#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>"#{settings.mount_point}/"}
+                                   :path=>"#{settings.mount_point}/",
+                                   :secure=>true}
         return 200
     else
         sleep(3)
@@ -123,7 +127,8 @@ get "#{settings.mount_point}/api/:cal_id" do
     if(cookies[:ssid] && settings.db.ssid2email(cookies[:ssid]))
         response.set_cookie :ssid,{:value=>cookies[:ssid],
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>"#{settings.mount_point}/"}
+                                   :path=>"#{settings.mount_point}/",
+                                   :secure=>true}
     end
 
     content_type :json
@@ -175,7 +180,8 @@ post "#{settings.mount_point}/api/:cal_id" do
 
     response.set_cookie :ssid,{:value=>ssid,
                                :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                               :path=>"#{settings.mount_point}/"}
+                               :path=>"#{settings.mount_point}/",
+                               :secure=>true}
 
     content_type :json
     JSON.dump(data)
@@ -193,7 +199,8 @@ delete "#{settings.mount_point}api/:cal_id" do
 
     response.set_cookie :ssid,{:value=>ssid,
                                :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                               :path=>"#{settings.mount_point}/"}
+                               :path=>"#{settings.mount_point}/",
+                               :secure=>true}
     content_type :json
     JSON.dump(data)
 end
@@ -205,9 +212,13 @@ get "#{settings.mount_point}/admin/csv" do
     return 400 unless data
 
     content_type 'text/csv'
-    attachment 'test.csv'
+    attachment "kattefes-volunteers-#{Time.now.strftime('%Y%m%d_%H%M%S')}.csv"
 
-    data
+    if(request.user_agent=~/Mac OS X/)
+        NKF.nkf('-W -s -Z',data)
+    else
+        data
+    end
 end
 
 
