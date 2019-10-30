@@ -2,7 +2,7 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-10-30 22:36:57 zophos>
+// Time-stamp: <2019-10-30 23:25:09 zophos>
 //
 
 function View()
@@ -49,7 +49,10 @@ function View()
 
 	if(document.view){
 	    document.view._reload_timer=
-	    setTimeout(document.view.calendar.draw.bind(document.view.calendar),
+	    setTimeout(document.view.calendar.draw.bind(
+		document.view.calendar,
+		document.view.calendar.currentYear,
+		document.view.calendar.currentMonth),
 		       document.view._RELOAD_DURATION);
 	}
     }

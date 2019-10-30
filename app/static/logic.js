@@ -2,7 +2,7 @@
 // logic.js
 //
 //
-// Time-stamp: <2019-10-30 23:02:06 zophos>
+// Time-stamp: <2019-10-30 23:24:30 zophos>
 //
 
 function View()
@@ -72,7 +72,10 @@ function View()
 
 	if(document.view){
 	    document.view._reload_timer=
-	    setTimeout(document.view.calendar.draw.bind(document.view.calendar),
+	    setTimeout(document.view.calendar.draw.bind(
+		document.view.calendar,
+		document.view.calendar.currentYear,
+		document.view.calendar.currentMonth),
 		       document.view._RELOAD_DURATION);
 	}
     }
