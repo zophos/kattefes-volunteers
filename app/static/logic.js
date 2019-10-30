@@ -2,7 +2,7 @@
 // logic.js
 //
 //
-// Time-stamp: <2019-10-30 14:01:16 zophos>
+// Time-stamp: <2019-10-30 19:59:17 zophos>
 //
 
 function View()
@@ -24,7 +24,7 @@ function View()
 	    var you=cell.getAttribute('data-you')
 	    if(you)
 		number=parseInt(you,10);
-	    view.draw_submit_dialog(date,number);
+	    view.draw_submit_dialog(date,number,you);
 	}
 	else
 	    view.draw_submit_with_login_dialog(
@@ -238,12 +238,12 @@ View.prototype.draw_registorate_dialog=function()
 			    this.hide_dialog.call(this);
 			});
 }
-View.prototype.draw_submit_dialog=function(date,number)
+View.prototype.draw_submit_dialog=function(date,number,you=null)
 {
     this._prepair_draw_dialog(this._submit_html(this._build_date_str(date),
 						number));
 
-    el=document.getElementById('button-submit')
+    el=document.getElementById('button-submit');
     el.addEventListener(
 	'click',
 	(event)=>{
@@ -276,12 +276,24 @@ View.prototype.draw_submit_dialog=function(date,number)
 		  });
 	});
 
-    el=document.getElementById('button-cancel')
+    if(you){
+	el=document.getElementById('button-withdraw');
+	el.addEventListener(
+	    'click',
+	    (event)=>{
+		document.getElementById('entry-num').value=0;
+		document.getElementById('button-submit').dispatchEvent(
+		    new Event('click'));
+	    })
+	el.parentElement.style.display='block';
+    }
+
+    el=document.getElementById('button-cancel');
     el.addEventListener('click',
 			(event)=>{
 			    this.hide_dialog.call(this);
 			});
-    el=document.getElementById('button-close')
+    el=document.getElementById('button-close');
     el.addEventListener('click',
 			(event)=>{
 			    this.hide_dialog.call(this);
@@ -462,6 +474,7 @@ View.prototype._submit_html=function(date,number)
 <dd class='entry-num'><input class='input' id='entry-num' value='${number}' required='required' pattern="^[0-9]+$"></input></dd>
 <dt class='note'>備考</dt>
 <dd class='note'><input class='input' id='note'></input></dd>
+<dd class='withdraw'><input class='button' id='button-withdraw' type='button' value='参加取り消し'></input>
 </dl>
 <p id='login-message'></p>
 <p class='buttons'>

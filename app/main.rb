@@ -30,8 +30,8 @@ helpers do
 
     def authorized?
         @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-        username = ENV['HTTP_AUTH_ID']
-        password = ENV['HTTP_AUTH_PASS']
+        username = ENV['HTTP_ID']
+        password = ENV['HTTP_KEY']
         @auth.provided? &&
             @auth.basic? &&
             @auth.credentials &&
