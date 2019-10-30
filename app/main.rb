@@ -258,7 +258,12 @@ get "#{settings.mount_point}/admin/" do
                         'index.html')
 end
 
-
 get "#{settings.mount_point}/" do
     send_file File.join(settings.public_folder, 'index.html')
+end
+
+
+not_found do
+    content_type :txt
+    'Not found.'
 end
