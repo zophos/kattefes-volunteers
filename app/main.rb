@@ -18,6 +18,7 @@ configure do
                     ENV['DB_KEY'])
     set :public_folder, File.dirname(__FILE__) + '/static'
     set :mount_point,''
+    set :is_secure,true
 end
 
 helpers do
@@ -47,7 +48,7 @@ post "#{settings.mount_point}/api/login" do
         response.set_cookie :ssid,{:value=>ssid,
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
                                    :path=>"#{settings.mount_point}/",
-                                   :secure=>true}
+                                   :secure=>settings.is_secure}
         return 200
     else
         sleep(3)
@@ -61,7 +62,7 @@ get "#{settings.mount_point}/api/logout" do
         response.set_cookie :ssid,{:value=>"",
                                    :max_age=>"0",
                                    :path=>"#{settings.mount_point}/",
-                                   :secure=>true}
+                                   :secure=>settings.is_secure}
     end
 
     return 200
@@ -74,7 +75,7 @@ post "#{settings.mount_point}/api/ssid" do
         response.set_cookie :ssid,{:value=>ssid,
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
                                    :path=>"#{settings.mount_point}/",
-                                   :secure=>true}
+                                   :secure=>settings.is_secure}
         return 200
     else
         sleep(3)
@@ -110,7 +111,7 @@ post "#{settings.mount_point}/api/member" do
         response.set_cookie :ssid,{:value => ssid,
                                    :max_age => "#{DB::SESSION_EXPIRE_SEC}",
                                    :path=>"#{settings.mount_point}/",
-                                   :secure=>true}
+                                   :secure=>settings.is_secure}
         return 200
     else
         sleep(3)
@@ -128,7 +129,7 @@ get "#{settings.mount_point}/api/:cal_id" do
         response.set_cookie :ssid,{:value=>cookies[:ssid],
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
                                    :path=>"#{settings.mount_point}/",
-                                   :secure=>true}
+                                   :secure=>settings.is_secure}
     end
 
     content_type :json
@@ -181,7 +182,7 @@ post "#{settings.mount_point}/api/:cal_id" do
     response.set_cookie :ssid,{:value=>ssid,
                                :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
                                :path=>"#{settings.mount_point}/",
-                               :secure=>true}
+                               :secure=>settings.is_secure}
 
     content_type :json
     JSON.dump(data)
@@ -200,7 +201,7 @@ delete "#{settings.mount_point}api/:cal_id" do
     response.set_cookie :ssid,{:value=>ssid,
                                :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
                                :path=>"#{settings.mount_point}/",
-                               :secure=>true}
+                               :secure=>settings.is_secure}
     content_type :json
     JSON.dump(data)
 end
