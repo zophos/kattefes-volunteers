@@ -5,7 +5,7 @@
 // Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
 // kattefes@officebarbecue.jp
 // 
-// Time-stamp: "2019-10-30 07:35:23 zophos"
+// Time-stamp: "2019-10-30 17:17:41 zophos"
 -->
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>相模湖みの石滝キャンプ場 災害復旧ボランティア管理</title>
@@ -13,17 +13,20 @@
       href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
       integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf"
       crossorigin="anonymous" />
-<link rel="stylesheet" type="text/css" href="main.css?2019102900">
-<script src='./fetch.js' type='module'></script>
+<link rel="stylesheet" type="text/css" href="../main.css?2019102900">
+<link rel="stylesheet" type="text/css" href="admin.css?2019102900">
+<script src='../fetch.js' type='module'></script>
+<script src='../calendar.js' type='text/javascript'></script>
 <script src='admin.js' type='text/javascript'></script>
 </head>
-<body>
+<body id='admin'>
 <h1>相模湖みの石滝キャンプ場<br />災害復旧ボランティア管理</h1>
+<p id='login-ctrl' class='loggedin'>
+<a id='do-csv' href='./csv'>[CSV出力]</span>
+<a id='do-logout' href='../'>[一般カレンダー]</a></p>
 <div class='cal' id='cal-div'>
-<h2></h2>
-<p>
-<input type='checkbox' id='select-closed' />締切/中止済を含む
-</p>
+</div>
+<div id='overray'>
 </div>
 </body>
 </html>

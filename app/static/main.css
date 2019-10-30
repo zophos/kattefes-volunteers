@@ -2,7 +2,7 @@
 // Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
 // kattefes@officebarbecue.jp
 //
-// Time-stamp: "2019-10-29 19:01:53 zophos"
+// Time-stamp: "2019-10-30 17:15:44 zophos"
 */
 html,
 body{
@@ -19,11 +19,14 @@ h1{
     margin:2em 0;
     text-align:right;
 }
-#login-ctrl.loggedin #do-login,
-#login-ctrl.loggedin #do-signup{
-    display:none;
+#login-ctrl span{
+    color:blue;
+    text-decoration: underline;
+    cursor: pointer;
 }
-#login-ctrl.loggedout #do-edit,
+#login-ctrl.loggedin #do-login,
+#login-ctrl.loggedin #do-signup,
+#do-edit,
 #login-ctrl.loggedout #do-logout{
     display:none;
 }
@@ -141,6 +144,25 @@ table.cal td table.canceled td:before
     align-items:center;
     background-color:rgba(255,255,255,0.5);
 }
+#overray .dialog{
+    width:55%;
+    font-size:large;
+    padding:0 3em 3em;
+    background-color:#f0f0f0;
+    border-radius:10px;
+    border:solid 5px rgba(120,120,120,0.75);
+    box-shadow:3px 3px 3px rgba(0,0,0,0.5);
+    max-height:90%;
+    overflow:auto;
+}
+#overray .dialog p.dialog-header{
+    margin:0.25em -0.75em 0 0;
+    padding:0;
+    text-align:right;
+    font-size:180%;
+    color:#787878;
+    text-shadow:1px 1px 2px rgba(0,0,0,0.5);
+}
 #overray .dialog input{
     margin:0;
     padding:0;
@@ -151,15 +173,6 @@ table.cal td table.canceled td:before
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-}
-#overray .dialog{
-    width:55%;
-    font-size:large;
-    padding:0 3em 3em;
-    background-color:#f0f0f0;
-    border-radius:10px;
-    border:solid 5px rgba(120,120,120,0.75);
-    box-shadow:3px 3px 3px rgba(0,0,0,0.5);
 }
 #overray .dialog h2{
     text-align:center;

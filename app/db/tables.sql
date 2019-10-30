@@ -32,6 +32,9 @@ create table date_status_codes (
     status_code integer primary key,
     description text
 );
+create index date_status_codes_description_index
+ on date_status_codes(description);
+
 insert into date_status_codes values (0,'open');
 insert into date_status_codes values (1,'closed');
 insert into date_status_codes values (2,'canceled');

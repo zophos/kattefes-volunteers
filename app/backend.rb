@@ -213,52 +213,22 @@ _EOS_
         _get_adate(date,email)
     end
 
-    def admin_list(from=nil,
-                   to=nil,
-                   with_closed=false)
-        cond=[]
-        c_value=[]
-        if(from)
-            (y,m,d)=_validate_date(from)
-            unless(y)
-                (y,m)=_validate_month(from)
-                d=1
-            end
-            if(y)
-                cond.push('date>=?')
-                c_value.push("%04d%02d%02d"%[y,m,d])
-            end
-        end
-        if(to)
-            (y,m,d)=_validate_date(to)
-            unless(y)
-                (y,m)=_validate_month(to)
-                d=31
-            end
-            if(y)
-                cond.push('date<=?')
-                c_value.push("%04d%02d%02d"%[y,m,d])
-            end
-        end
-        unless(with_closed)
-            cond.push('status=?')
-            c_value.push('open')
-        end
+    def combined_list(date)
+        (y,m,d)=_validate_date(date)
+        return nil unless y
 
-        where="where #{cond.join(' and ')}" unless(cond.empty?)
-
-        ret={}
+        ret=nil
         sql=<<_EOS_
-select * from combined_schedules #{where}
+select * from combined_schedules where date=?
 _EOS_
-        @db.fetch(sql,*c_value){|row|
-            ret[row[:date]]||={
+        @db.fetch(sql,date){|row|
+            ret||={
                 'status'=>row[:status],
                 'num'=>0,
-                'members'=[]
+                'members'=>[]
             }
-            ret[row[:date]]['num']+=row[:num]
-            ret[row[:date]]['members'].push(
+            ret['num']+=row[:num]
+            ret['members'].push(
                 {'email'=>row[:email],
                  'name'=>row[:name],
                  'num'=>row[:num],
@@ -266,7 +236,67 @@ _EOS_
                  'note'=>row[:note]})
         }
 
-        return ret
+        return ret||{}
+    end
+
+    def admin_update(date,status,num)
+        (y,m,d)=_validate_date(date)
+        return nil unless y
+
+        sql=<<_EOS_
+select status_code from date_status_codes where description=? limit 1
+_EOS_
+
+        status_code=@db.fetch(sql,status).all
+        if(status_code.empty?)
+            status_code=0
+        else
+            status_code=status_code[0][:status_code]
+        end
+
+        @db.run('begin')
+        @db.fetch("update date_statuses set status_code=0 where date=?",
+                  date).all
+        num.each{|email,n|
+            if(n>0)
+                sql=<<_EOS_
+update schedules set number=? where date=? and email=?
+_EOS_
+                @db.fetch(sql,n,date,email).all
+            else
+                @db.fetch("delete from schedules where (date=? and email=?)",
+                          date,email).all
+            end
+        }
+
+        @db.fetch("update date_statuses set status_code=? where date=?",
+                  status_code,date).all
+        @db.run('commit')
+
+        _get_adate(date)
+    end
+
+    def admin_csv
+        ret=''
+        prev_date=nil
+        @db.fetch('select * from combined_schedules'){|row|
+            ret+="\r\n" if(prev_date && row[:date]!=prev_date)
+            prev_date=row[:date]
+
+            (y,m,d)=_validate_date(row[:date],true)
+            date='"%04d%02d%02d"'%[y,m,d]
+
+            buf=[date,
+                 "\"#{row[:name]}\"",
+                 "\"#{row[:email]}\"",
+                 "\"#{row[:phone]}\"",
+                 row[:num],
+                 "\"#{row[:note]}\""]
+            
+            ret+=buf.join(", ")+"\r\n"
+        }
+
+        ret
     end
 
     private
@@ -288,16 +318,18 @@ _EOS_
         [y,m]
     end
 
-    def _validate_date(date)
+    def _validate_date(date,parse_only=nil)
         date=date.to_i
         d=date%100
         m=(date/100)%100
         y=date%10000
 
-        begin
-            Time.new(y,m,d)
-        rescue ArgumentError
-            return nil
+        if(!parse_only)
+            begin
+                Time.new(y,m,d)
+            rescue ArgumentError
+                return nil
+            end
         end
 
         return [y,m,d]
@@ -307,7 +339,7 @@ _EOS_
         email=~/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
     end
 
-    def _get_adate(date,email)
+    def _get_adate(date,email=nil)
         ret={}
 
         sql=<<_EOS_
@@ -318,13 +350,15 @@ _EOS_
                              'status'=>row[:status]}
         }
 
-        sql=<<_EOS_
+        if(email)
+            sql=<<_EOS_
 select date, number as num from schedules
 where (date=? and email=?) order by date
 _EOS_
-        @db.fetch(sql,date,email){|row|
-            ret[row[:date]]['you']=row[:num]
-        }
+            @db.fetch(sql,date,email){|row|
+                ret[row[:date]]['you']=row[:num]
+            }
+        end
 
         return ret
     end

@@ -30,8 +30,8 @@ helpers do
 
     def authorized?
         @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-        username = ENV['BASIC_AUTH_USERNAME']
-        password = ENV['BASIC_AUTH_PASSWORD']
+        username = ENV['HTTP_AUTH_ID']
+        password = ENV['HTTP_AUTH_PASS']
         @auth.provided? &&
             @auth.basic? &&
             @auth.credentials &&
@@ -46,7 +46,7 @@ post "#{settings.mount_point}/api/login" do
     if(ssid)
         response.set_cookie :ssid,{:value => ssid,
                                    :max_age => "#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>'/'}
+                                   :path=>"#{settings.mount_point}/"}
         return 200
     else
         sleep(3)
@@ -59,7 +59,7 @@ get "#{settings.mount_point}/api/logout" do
     if(cookies[:ssid])
         response.set_cookie :ssid,{:value=>"",
                                    :max_age=>"0",
-                                   :path=>'/'}
+                                   :path=>"#{settings.mount_point}/"}
     end
 
     return 200
@@ -71,7 +71,7 @@ post "#{settings.mount_point}/api/ssid" do
     if(ssid)
         response.set_cookie :ssid,{:value => ssid,
                                    :max_age => "#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>'/'}
+                                   :path=>"#{settings.mount_point}/"}
         return 200
     else
         sleep(3)
@@ -106,7 +106,7 @@ post "#{settings.mount_point}/api/member" do
     if(ssid)
         response.set_cookie :ssid,{:value => ssid,
                                    :max_age => "#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>'/'}
+                                   :path=>"#{settings.mount_point}/"}
         return 200
     else
         sleep(3)
@@ -123,7 +123,7 @@ get "#{settings.mount_point}/api/:cal_id" do
     if(cookies[:ssid] && settings.db.ssid2email(cookies[:ssid]))
         response.set_cookie :ssid,{:value=>cookies[:ssid],
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>'/'}
+                                   :path=>"#{settings.mount_point}/"}
     end
 
     content_type :json
@@ -175,7 +175,7 @@ post "#{settings.mount_point}/api/:cal_id" do
 
     response.set_cookie :ssid,{:value=>ssid,
                                :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                               :path=>'/'}
+                               :path=>"#{settings.mount_point}/"}
 
     content_type :json
     JSON.dump(data)
@@ -193,15 +193,47 @@ delete "#{settings.mount_point}api/:cal_id" do
 
     response.set_cookie :ssid,{:value=>ssid,
                                :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                               :path=>'/'}
+                               :path=>"#{settings.mount_point}/"}
     content_type :json
     JSON.dump(data)
 end
 
-
-get "#{settings.mount_point}/admin/list" do
+get "#{settings.mount_point}/admin/csv" do
     protect!
     
+    data=settings.db.admin_csv
+    return 400 unless data
+
+    content_type 'text/csv'
+    attachment 'test.csv'
+
+    data
+end
+
+
+get "#{settings.mount_point}/admin/list/:cal_id" do
+    protect!
+    
+    return 400 if params['cal_id']!~/^\d{8}$/
+    data=settings.db.combined_list(params['cal_id'])
+
+    content_type :json
+    JSON.dump(data)
+end
+
+post "#{settings.mount_point}/admin/list/:cal_id" do
+    protect!
+    
+    return 400 if params['cal_id']!~/^\d{8}$/
+    date=params['cal_id']
+    params=JSON.parse(request.body.read)
+
+    data=settings.db.admin_update(date,
+                                  params['status'],
+                                  params['num'])
+
+    return 400 unless data
+
 
     content_type :json
     JSON.dump(data)
