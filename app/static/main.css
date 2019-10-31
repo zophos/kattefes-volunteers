@@ -2,7 +2,7 @@
 // Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
 // kattefes@officebarbecue.jp
 //
-// Time-stamp: "2019-10-31 09:31:32 zophos"
+// Time-stamp: "2019-11-01 05:41:21 zophos"
 */
 html,
 body{
@@ -105,6 +105,10 @@ table.day td{
     width:5em;
     height:5em;
 }
+table.day td.go{
+    font-weight:bold;
+    background-color:#fffacd;
+}
 table.day td.you:after{
     font-family:"Font Awesome 5 Free";
     font-weight:900;
@@ -115,22 +119,33 @@ table.cal tr.wday th.sat,
 table.cal td.sat th{
     background-color:#d0f0d0;
 }
+table.cal td th{
+    background-color:#f0f0f0;
+}
 table.cal tr.wday th.sun,
 table.cal td.sun th,
 table.cal td table.nhd th{
     background-color:#f0d0d0;
 }
 table.cal td table.oom th,
-table.cal td table.closed th,
 table.cal td table.canceled th{
     background-color:#d0d0d0;
     color:#909090;
 }
 table.cal td table.oom td,
-table.cal td table.closed td,
 table.cal td table.canceled td{
     background-color:#e0e0e0;
     color:#909090;
+}
+table.cal td table
+{
+    cursor: pointer;
+}
+table.cal td table.oom,
+table.cal td table.closed,
+table.cal td table.canceled
+{
+    cursor: auto;
 }
 table.cal td table.closed td:before
 {

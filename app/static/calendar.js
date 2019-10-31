@@ -2,7 +2,7 @@
 // calendar.js
 //
 //
-// Time-stamp: <2019-10-31 00:38:11 zophos>
+// Time-stamp: <2019-11-01 05:20:06 zophos>
 //
 
 //
@@ -140,8 +140,11 @@ Calendar.prototype.set_cell_content=function(date,body)
     if(!td)
 	return;
 
-    if('all' in body)
-	td.innerText=body['all'];
+    if('all' in body){
+	td.innerText=parseInt(body['all'],10);
+	if(body['all']>=4)
+	    td.classList.add('go');
+    }
     else{
 	td.innerText='';
 	return;
@@ -151,7 +154,7 @@ Calendar.prototype.set_cell_content=function(date,body)
 	el.classList.add(body['status']);
 
     if('you' in body && body['you']>0){
-	td.setAttribute('class','you');
+	td.classList.add('you');
 	el.setAttribute('data-you',body['you']);
     }
 

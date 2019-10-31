@@ -18,7 +18,11 @@ configure do
                     ENV['DB_KEY'])
     set :public_folder, File.dirname(__FILE__) + '/static'
     set :mount_point,''
-    set :is_secure,true
+    if(settings.production?)
+        set :is_secure,true
+    else
+        set :is_secure,false
+    end
 end
 
 helpers do
