@@ -2,7 +2,7 @@
 // logic.js
 //
 //
-// Time-stamp: <2019-10-30 23:24:30 zophos>
+// Time-stamp: <2019-10-31 09:30:41 zophos>
 //
 
 function View()
@@ -32,7 +32,7 @@ function View()
 		localStorage.getItem('email')||'');
     }
 
-    this._RELOAD_DURATION=60000; // 1min
+    this._RELOAD_DURATION=300000; // 5min
     this._reload_timer=null;
 
     this.calendar.on_draw=function(year,month){
