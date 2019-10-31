@@ -1,5 +1,13 @@
 #!/bin/bash
 #
+# Usage:
+#
+# ./create_db.sh
+#
+# or creating encrypted DB
+#
+# DB_KEY=db_encrypt_key SQLITE=sqlcipher ./create_db.sh
+#
 #
 DIR=$(dirname $0)
 
