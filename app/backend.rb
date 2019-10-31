@@ -12,6 +12,11 @@ class DB
         # connection test
         #
         @db.run("select ssid from sessions limit 1")
+
+        #
+        # turn on foreign keys
+        #
+        @db.run("pragma foreign_keys=on;")
     end
 
     def login(email,passwd,client_ip='')

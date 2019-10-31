@@ -13,9 +13,10 @@ create table sessions (
     ssid text primary key,
     email text not null,
     expire integer not null,
-    foreign key(email) references members(email) on delete cascade
+    foreign key(email) references members(email)
+     on update cascade on delete cascade
 );
-	
+
 create table schedules (
     date integer not null check (date>20100000 and date<21000000),
     email text not null,
@@ -23,7 +24,8 @@ create table schedules (
     note text,
     lastupdate text not null,
     primary key(date,email),
-    foreign key(email) references members(email) on delete cascade
+    foreign key(email) references members(email)
+     on update cascade on delete cascade
 );
 create index schedules_date_index on schedules(date);
 create index schedules_email_index on schedules(email);
