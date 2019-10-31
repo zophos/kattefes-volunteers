@@ -23,8 +23,6 @@ configure do
     else
         set :is_secure,false
     end
-
-    set :protection,:except=>:http_origin
 end
 
 helpers do
