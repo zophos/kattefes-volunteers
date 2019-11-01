@@ -4,9 +4,9 @@ NISHI, Takao <zophos@koka-in.org>
 
 ## Dependencies
 
- + SQLite3
+ + SQLite3 >=3.6.19
  + sqlcipher (recommend)
- + Ruby >=2.5.0
+ + Ruby >=2.1.5
    + sinatra
    + sinatra-contrib
    + sqlite3 (build with --with-sqlcipher option)
@@ -14,14 +14,41 @@ NISHI, Takao <zophos@koka-in.org>
 
 ## Run
 
+### Initialize databae
+
 ~~~
- $ ruby app/main.rb
+ $ app/db/create_db.sh
 ~~~
+
+or create encrypted database
+
+~~~
+ $ DB_KEY=hogehoge  app/db/create_db.sh
+~~~
+
+### Execute
+
+administrator's id and password set to HTTP_ID and HTTP_KEY environment variables eg;
+~~~
+ $ HTTP_ID=foo HTTP_KEY=bar app/main.rb
+~~~
+
+For running with encrypted database, set database key to DB_KEY environment variables.
+
+~~~
+ $ HTTP_ID=foo HTTP_KEY=bar DB_KEY=hogehoge app/main.rb
+~~~
+
+### Access
+
+http://localhost:4567/ for voting
+
+http://localhost:4567/admin/ for administrating (will be required HTTP_ID/HTTP_KEY)
 
 
 ## License
 
-Copyright 2019. New Year KATTE FESTIVAL office. and NISHI, Takao
+Copyright 2019. NISHI Takao and New Year KATTE FESTIVAL office.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
