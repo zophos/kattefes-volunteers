@@ -14,8 +14,10 @@ require 'json'
 require './backend'
 
 configure do
-    set :db, DB.new('sqlite://'+File.dirname(__FILE__)+'/db/main.db',
-                    ENV['DB_KEY'])
+    db=DB.new('sqlite://'+File.dirname(__FILE__)+'/db/main.db',
+              ENV['DB_KEY'])
+    db.test # do connection test
+
     set :public_folder, File.dirname(__FILE__) + '/static'
     set :mount_point,''
     if(settings.production?)
@@ -26,17 +28,24 @@ configure do
 end
 
 helpers do
+    def db
+        @db_uri||="sqlite://#{File.dirname(__FILE__)}/db/main.db"
+        @db_key||=ENV['DB_KEY']
+
+        DB.new(@db_uri,@db_key)
+    end
+
     def protect!
         unless authorized?
-            response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
+            response['WWW-Authenticate']=%(Basic realm="Restricted Area")
             throw(:halt, [401, "Not authorized\n"])
         end
     end
 
     def authorized?
-        @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-        username = ENV['HTTP_ID']
-        password = ENV['HTTP_KEY']
+        @auth||=Rack::Auth::Basic::Request.new(request.env)
+        username=ENV['HTTP_ID']
+        password=ENV['HTTP_KEY']
         @auth.provided? &&
             @auth.basic? &&
             @auth.credentials &&
@@ -47,7 +56,7 @@ end
 
 post "#{settings.mount_point}/api/login" do
     params=JSON.parse(request.body.read)
-    ssid=settings.db.login(params['email'],params['passwd'],request.ip)
+    ssid=db.login(params['email'],params['passwd'],request.ip)
     if(ssid)
         response.set_cookie :ssid,{:value=>ssid,
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
@@ -61,7 +70,7 @@ post "#{settings.mount_point}/api/login" do
 end
 
 get "#{settings.mount_point}/api/logout" do
-    settings.db.logout(cookies[:ssid])
+    db.logout(cookies[:ssid])
     if(cookies[:ssid])
         response.set_cookie :ssid,{:value=>"",
                                    :max_age=>"0",
@@ -74,7 +83,7 @@ end
 
 post "#{settings.mount_point}/api/ssid" do
     params=JSON.parse(request.body.read)
-    ssid=settings.db.validate_session(cookies[:ssid],params['email'])
+    ssid=db.validate_session(cookies[:ssid],params['email'])
     if(ssid)
         response.set_cookie :ssid,{:value=>ssid,
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
@@ -106,11 +115,11 @@ post "#{settings.mount_point}/api/member" do
             return 400 unless keys.include?(k)
     }
 
-    ssid=settings.db.reg_member(params['email'],
-                                params['name'],
-                                params['phone'],
-                                params['passwd'],
-                                request.ip)
+    ssid=db.reg_member(params['email'],
+                       params['name'],
+                       params['phone'],
+                       params['passwd'],
+                       request.ip)
     if(ssid)
         response.set_cookie :ssid,{:value => ssid,
                                    :max_age => "#{DB::SESSION_EXPIRE_SEC}",
@@ -126,10 +135,11 @@ end
 get "#{settings.mount_point}/api/:cal_id" do
     return 400 if params['cal_id']!~/^\d{6}$/
 
-    data=settings.db.get(params['cal_id'],cookies[:ssid])
+    @db=db
+    data=@db.get(params['cal_id'],cookies[:ssid])
     return 400 unless data
 
-    if(cookies[:ssid] && settings.db.ssid2email(cookies[:ssid]))
+    if(cookies[:ssid] && @db.ssid2email(cookies[:ssid]))
         response.set_cookie :ssid,{:value=>cookies[:ssid],
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
                                    :path=>"#{settings.mount_point}/",
@@ -150,11 +160,12 @@ post "#{settings.mount_point}/api/:cal_id" do
     return 400 unless keys.include?('num')
 
     ssid=cookies[:ssid]
+    @db=db
     unless(ssid)
         ['email','passwd'].each{|k|
             return 401 unless keys.include?(k)
         }
-        ssid=settings.db.login(params['email'],
+        ssid=@db.login(params['email'],
                                params['passwd'],
                                request.ip)
         
@@ -165,7 +176,7 @@ post "#{settings.mount_point}/api/:cal_id" do
                     return 401
                 end
             }
-            ssid=settings.db.reg_member(params['email'],
+            ssid=@db.reg_member(params['email'],
                                         params['name'],
                                         params['phone'],
                                         params['passwd'],
@@ -177,7 +188,7 @@ post "#{settings.mount_point}/api/:cal_id" do
         end
     end
 
-    data=settings.db.post(ssid,
+    data=@db.post(ssid,
                   cal_id,
                   params['num'],
                   params['note'])
@@ -196,7 +207,7 @@ delete "#{settings.mount_point}api/:cal_id" do
     return 400 if params['cal_id']!~/^\d{8}$/
     return 401 unless cookie.kas_key?(:ssid)
 
-    data=settings.db.delete(cookie[:ssid],params['cal_id'])
+    data=db.delete(cookie[:ssid],params['cal_id'])
     unless data
         sleep(3)
         return 400
@@ -213,7 +224,7 @@ end
 get "#{settings.mount_point}/admin/csv" do
     protect!
     
-    data=settings.db.admin_csv
+    data=db.admin_csv
     return 400 unless data
 
     content_type 'text/csv'
@@ -231,7 +242,7 @@ get "#{settings.mount_point}/admin/list/:cal_id" do
     protect!
     
     return 400 if params['cal_id']!~/^\d{8}$/
-    data=settings.db.combined_list(params['cal_id'])
+    data=db.combined_list(params['cal_id'])
 
     content_type :json
     JSON.dump(data)
@@ -244,9 +255,9 @@ post "#{settings.mount_point}/admin/list/:cal_id" do
     date=params['cal_id']
     params=JSON.parse(request.body.read)
 
-    data=settings.db.admin_update(date,
-                                  params['status'],
-                                  params['num'])
+    data=db.admin_update(date,
+                         params['status'],
+                         params['num'])
 
     return 400 unless data
 
