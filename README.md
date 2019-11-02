@@ -28,15 +28,18 @@ or create encrypted database
 
 ### Execute
 
-administrator's id and password set to HTTP_ID and HTTP_KEY environment variables eg;
 ~~~
- $ HTTP_ID=foo HTTP_KEY=bar app/main.rb
+ $ app/main.rb
 ~~~
+
+Default user name for administration page is 'admin'.
+Password is automatic genarated and shown to STDERR.
+
 
 For running with encrypted database, set database key to DB_KEY environment variables.
 
 ~~~
- $ HTTP_ID=foo HTTP_KEY=bar DB_KEY=hogehoge app/main.rb
+ $ DB_KEY=hogehoge app/main.rb
 ~~~
 
 #### Options
@@ -60,11 +63,11 @@ See "Command Line" section on [Sinatra:README](http://sinatrarb.com/intro.html).
 <dt>SMTP_PORT</dt>
 <dd>SMTP port number. Default: 25</dd>
 
-<dt>HTTP_ID</dt>
-<dd>ID for administration page authentication. Default: null (nobody allowed).</dd>
+<dt>HTTP_AUTH_USER</dt>
+<dd>ID for administration page authentication. Default: admin.</dd>
 
-<dt>HTTP_KEY</dt>
-<dd>Password for administration page authentication. Default: null (nobody allowed).</dd>
+<dt>HTTP_AUTH_PASS</dt>
+<dd>Password for administration page authentication. Default: automatic generated 32 random charactors. (shown to STDERR).</dd>
 
 <dt>DB_KEY</dt>
 <dd>Database decryption key. Default: null</dd>

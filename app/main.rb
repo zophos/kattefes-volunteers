@@ -16,26 +16,56 @@ require 'tilt/erb'
 require './backend'
 
 configure do
-    db=DB.new("sqlite://#{File.dirname(__FILE__)}/db/main.db",
-              ENV['DB_KEY'])
-    db.test # do connection test
-
     set :public_folder,File.dirname(__FILE__) + '/static'
+
     set :mount_point,''
+
+    #
+    # cookie
+    #
     if(settings.production?)
         set :is_secure,true
     else
         set :is_secure,false
     end
 
+    #
+    # database
+    #
+    db_uri="sqlite://#{File.dirname(__FILE__)}/db/main.db"
+    # connecting test
+    db=DB.new(db_uri,ENV['DB_KEY'])
+    db.test
+    
+    set :db_uri,db_uri
+    set :db_key,ENV['DB_KEY']
+
+    #
+    # http auth
+    #
+    set :http_auth_user,ENV['HTTP_AUTH_USER']||'admin'
+    pw=ENV['HTTP_AUTH_PASS']
+    unless(pw)
+        pw=OpenSSL::Digest::SHA256.hexdigest(Process.pid.to_s+
+                                             Time.now.to_i.to_s+
+                                             rand().to_s)[0..31]
+        $stderr<<<<_EOS_
+!!!
+!!! HTTP_AUTH_PASS has been set to #{pw} 
+!!!
+_EOS_
+    end
+    set :http_auth_pass,pw
+
     set :mail_from,ENV['MAIL_FROM']||"#{ENV['USER']}@#{Socket.gethostname}"
     set :mail_to,ENV['MAIL_TO']
+
 end
 
 helpers do
     def db
-        @db_uri||="sqlite://#{File.dirname(__FILE__)}/db/main.db"
-        @db_key||=ENV['DB_KEY']
+        @db_uri||=settings.db_uri
+        @db_key||=settings.db_key
 
         DB.new(@db_uri,@db_key)
     end
@@ -49,12 +79,12 @@ helpers do
 
     def authorized?
         @auth||=Rack::Auth::Basic::Request.new(request.env)
-        username=ENV['HTTP_ID']
-        password=ENV['HTTP_KEY']
+            
         @auth.provided? &&
             @auth.basic? &&
             @auth.credentials &&
-            @auth.credentials == [username, password]
+            @auth.credentials==[settings.http_auth_user,
+                                settings.http_auth_pass]
     end
 
     def format_date(date)
