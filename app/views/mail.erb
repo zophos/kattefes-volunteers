@@ -1,6 +1,6 @@
 From: <%= @from %>
-To: <%= (@to.respond_to?(:to_a) ? to : [to]).to_a.join(",\n ") %>
-Subject: <%= NKF.nkf('-WjMm0',@subject) %>
+To: <%= (@to.respond_to?(:to_a) ? @to : [@to]).to_a.join(",\n ") %>
+Subject: <%= NKF.nkf('-WjMm0',@subject.strip) %>
 Date: <%= Time::now.strftime('%a, %d %b %Y %X %z') %>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-JP
