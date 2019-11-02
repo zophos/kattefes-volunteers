@@ -2,7 +2,7 @@
 // logic.js
 //
 //
-// Time-stamp: <2019-11-02 16:34:39 zophos>
+// Time-stamp: <2019-11-02 20:04:54 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -474,8 +474,10 @@ View.prototype._build_date_str=function(date)
     var y=date.slice(0,4);
     var m=date.slice(4,6);
     var d=date.slice(-2);
-    var _date=new Date(y,m,d);
+    var _date=new Date(y,m-1,d);
     var wday=this.calendar._WDAY[_date.getDay()];
+
+    console.log([y,m,d,wday,_date,_date.getDay()]);
 
     return `${y}/${m}/${d} (${wday.capitalize()}.)`;
 }

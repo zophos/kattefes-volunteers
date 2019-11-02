@@ -2,7 +2,7 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-10-31 09:38:33 zophos>
+// Time-stamp: <2019-11-02 20:06:00 zophos>
 //
 
 function View()
@@ -265,7 +265,7 @@ View.prototype._build_date_str=function(date)
     var y=date.slice(0,4);
     var m=date.slice(4,6);
     var d=date.slice(-2);
-    var _date=new Date(y,m,d);
+    var _date=new Date(y,m-1,d);
     var wday=this.calendar._WDAY[_date.getDay()];
 
     return `${y}/${m}/${d} (${wday.capitalize()}.)`;
