@@ -1,4 +1,4 @@
-# 災害復旧ボランティア登録システム
+# A Simple Reservation Management System
 
 NISHI, Takao <zophos@tsubuan.dev>
 
