@@ -1,0 +1,9 @@
+From: <%= @from %>
+To: <%= (@to.respond_to?(:to_a) ? to : [to]).to_a.join(",\n ") %>
+Subject: <%= NKF.nkf('-WjMm0',@subject) %>
+Date: <%= Time::now.strftime('%a, %d %b %Y %X %z') %>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
+
+<%= NKF.nkf('-Wjm0',@body).force_encoding('ASCII-8BIT') %>

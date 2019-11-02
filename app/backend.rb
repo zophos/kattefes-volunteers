@@ -163,12 +163,13 @@ _EOS_
         email=self.ssid2email(ssid)
         if(email)
             sql=<<_EOS_
-select date, number as num from schedules
+select date, number as num,note from schedules
 where (date>=? and date<=? and email=?) order by date
 _EOS_
             @db.fetch(sql,from,to,email){|row|
                 begin
                     ret[row[:date]]['you']=row[:num]
+                    ret[row[:date]]['note']=row[:note] if row[:note]
                 rescue NoMethodError
                 end
             }
@@ -177,7 +178,7 @@ _EOS_
         ret
     end
 
-    def post(ssid,date,num,note=nil,ssid_as_email=false)
+    def post(ssid,date,num,note=nil,ssid_as_email=false,&on_succeed)
         email=ssid_as_email ? ssid : self.ssid2email(ssid)
         return nil unless email
         
@@ -186,33 +187,49 @@ _EOS_
 
         num=NKF.nkf('-w -Z4',num.to_s).to_i
         num=num.to_i
-        return self.delete(email,date,true) if num<=0
+        return self.delete(email,date,true,&on_succeed) if num<=0
 
         sql=<<_EOS_
 insert or replace into schedules values (?,?,?,?,?)
 _EOS_
+        row=nil
         begin
-            @db.fetch(sql,date,email,num,note,Time.now.localtime.to_s).all
+            row=@db.fetch(sql,date,email,num,note,Time.now.localtime.to_s).all
         rescue Sequel::DatabaseError
         end
+        
+        yield(date,email,num,note) if(row && on_succeed)
 
         _get_adate(date,email)
     end
 
-    def delete(ssid,date,ssid_as_email=false)
+    def delete(ssid,date,ssid_as_email=false,&on_succeed)
         email=ssid_as_email ? ssid : self.ssid2email(ssid)
         return nil unless email
 
         (y,m,d)=_validate_date(date)
         return nil unless y
 
-        sql=<<_EOS_
+        row=nil
+        begin
+            @db.run('begin')
+            sql=<<_EOS_
+select date,email,number as num,note from schedules where (date=? and email=?)
+_EOS_
+            row=@db.fetch(sql,date,email).all[0]
+            if(row)
+                sql=<<_EOS_
 delete from schedules where (date=? and email=?)
 _EOS_
-        begin
-            @db.fetch(sql,date,email).all
+                @db.fetch(sql,date,email).all
+                @db.run('commit')
+            end
         rescue Sequel::DatabaseError
+            row=nil
+            @db.run('rollback')
         end
+
+        yield(date,email,row[:num],row[:note]) if(row && on_succeed)
 
         _get_adate(date,email)
     end
@@ -303,6 +320,14 @@ _EOS_
         ret
     end
 
+    def email2memberinfo(email)
+        sql=<<_EOS_
+select email,name,phone from members where email=? limit 1
+_EOS_
+        @db.fetch(sql,email).all[0]
+    end
+
+
     private
     def _hash(str)
         OpenSSL::Digest::SHA256.hexdigest(str)
@@ -356,11 +381,12 @@ _EOS_
 
         if(email)
             sql=<<_EOS_
-select date, number as num from schedules
+select date, number as num,note from schedules
 where (date=? and email=?) order by date
 _EOS_
             @db.fetch(sql,date,email){|row|
                 ret[row[:date]]['you']=row[:num]
+                ret[row[:date]]['note']=row[:note]
             }
         end
 

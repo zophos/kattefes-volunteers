@@ -11,20 +11,25 @@ require 'sinatra'
 require 'sinatra/cookies'
 #require 'sinatra/reloader'
 require 'json'
+require 'net/smtp'
+require 'tilt/erb'
 require './backend'
 
 configure do
-    db=DB.new('sqlite://'+File.dirname(__FILE__)+'/db/main.db',
+    db=DB.new("sqlite://#{File.dirname(__FILE__)}/db/main.db",
               ENV['DB_KEY'])
     db.test # do connection test
 
-    set :public_folder, File.dirname(__FILE__) + '/static'
+    set :public_folder,File.dirname(__FILE__) + '/static'
     set :mount_point,''
     if(settings.production?)
         set :is_secure,true
     else
         set :is_secure,false
     end
+
+    set :mail_from,ENV['MAIL_FROM']||"#{ENV['USER']}@#{Socket.gethostname}"
+    set :mail_to,ENV['MAIL_TO']
 end
 
 helpers do
@@ -50,6 +55,29 @@ helpers do
             @auth.basic? &&
             @auth.credentials &&
             @auth.credentials == [username, password]
+    end
+
+    def format_date(date)
+        m=/(\d{4})(\d{2})(\d{2})/.match(date)
+        Time.new(m[1],m[2],m[3]).strftime("%Y/%m/%d/ (%a.)")
+    end
+
+    def sendmail(body)
+        return nil unless settings.mail_to
+
+        @smtp_host||=(ENV['SMTP_HOSTNAME']||'localhost')
+        @smtp_port||=(ENV['SMTP_PORT']||25)
+
+        begin
+            Net::SMTP.start(@smtp_host,@smtp_port){|smtp|
+                smtp.send_mail(body,
+                               settings.mail_from,
+                               settings.mail_to)
+            }
+            true
+        rescue Errno::ECONNREFUSED
+            nil
+        end
     end
 end
 
@@ -191,7 +219,29 @@ post "#{settings.mount_point}/api/:cal_id" do
     data=@db.post(ssid,
                   cal_id,
                   params['num'],
-                  params['note'])
+                  params['note']){|date,email,num,note|
+        row=db.email2memberinfo(email)
+        next unless row
+                 
+        @action=if(params['num'].to_i>0)
+                    'post'
+                else  
+                    'delete'
+                end
+        @from=settings.mail_from
+        @to=settings.mail_to
+        @subject=erb(:mail_subject)
+        @date=format_date(date)
+        @name=row[:name]
+        @email=email
+        @phone=row[:phone]
+        @num=num
+        @note=note
+        
+        @body=erb(:mail_body)
+        sendmail(erb(:mail))
+    }
+
     return 400 unless data
 
     response.set_cookie :ssid,{:value=>ssid,
@@ -207,7 +257,25 @@ delete "#{settings.mount_point}api/:cal_id" do
     return 400 if params['cal_id']!~/^\d{8}$/
     return 401 unless cookie.kas_key?(:ssid)
 
-    data=db.delete(cookie[:ssid],params['cal_id'])
+    data=db.delete(cookie[:ssid],params['cal_id']){|date,email,num,note|
+        row=db.email2memberinfo(email)
+        next unless row
+
+        @from=settings.mail_from
+        @to=settings.mail_to
+        @subject=erb(:mail_subject)
+        @date=format_date(date)
+        @name=row[:name]
+        @email=email
+        @phone=row[:phone]
+        @num=num
+        @note=note
+
+        @action='delete'
+        @body=erb(:mail_body)
+
+        sendmail(erb(:mail))
+    }
     unless data
         sleep(3)
         return 400

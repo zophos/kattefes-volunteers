@@ -7,6 +7,7 @@ Calendar.prototype.set_cell_content=function(date,body)
     el.classList.remove('closed');
     el.classList.remove('canceld');
     el.removeAttribute('data-you');
+    el.removeAttribute('data-note');
 
     var td=el.getElementsByTagName('td')[0]
     if(!td)
@@ -28,6 +29,9 @@ Calendar.prototype.set_cell_content=function(date,body)
     if('you' in body && body['you']>0){
 	td.classList.add('you');
 	el.setAttribute('data-you',body['you']);
+
+	if('note' in body && body['note'])
+	    el.setAttribute('data-note',body['note']);
     }
 
 }

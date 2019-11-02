@@ -2,8 +2,21 @@
 // logic.js
 //
 //
-// Time-stamp: <2019-11-01 05:45:13 zophos>
+// Time-stamp: <2019-11-02 16:34:39 zophos>
 //
+
+String.prototype.escapeHTML=function()
+{
+  return this.replace(/[&'`"<>]/g,(m)=>{
+      return {'&':'&amp;',
+	      "'":'&#x27;',
+	      '`':'&#x60;',
+	      '"':'&quot;',
+	      '<':'&lt;',
+	      '>':'&gt;'}[m]
+  });
+}
+
 
 function View()
 {
@@ -21,10 +34,10 @@ function View()
 	var view=document.view;
 	var number=1;
 	if(view.loggedin){
-	    var you=cell.getAttribute('data-you')
+	    var you=cell.dataset.you;
 	    if(you)
 		number=parseInt(you,10);
-	    view.draw_submit_dialog(date,number,you);
+	    view.draw_submit_dialog(date,number,you,cell.dataset.note);
 	}
 	else
 	    view.draw_submit_with_login_dialog(
@@ -256,10 +269,11 @@ View.prototype.draw_registorate_dialog=function()
 			    this.hide_dialog.call(this);
 			});
 }
-View.prototype.draw_submit_dialog=function(date,number,you=null)
+View.prototype.draw_submit_dialog=function(date,number,you=null,note=null)
 {
     this._prepair_draw_dialog(this._submit_html(this._build_date_str(date),
-						number));
+						number,
+						note));
 
     el=document.getElementById('button-submit');
     el.addEventListener(
@@ -291,7 +305,10 @@ View.prototype.draw_submit_dialog=function(date,number,you=null)
 		      Object.keys(json).forEach((k)=>{
 			  document.view.calendar.set_cell_content(k,json[k]);
 		      });
-		      document.view.draw_accepted_dialog();
+		      if(number>0)
+			  document.view.draw_accepted_dialog();
+		      else
+			  document.view.draw_deleted_dialog();
 		  });
 	});
 
@@ -428,6 +445,22 @@ View.prototype.draw_accepted_dialog=function()
 			    this.hide_dialog.call(this);
 			});
 }
+View.prototype.draw_deleted_dialog=function()
+{
+    this._prepair_draw_dialog(this._deleted_html());
+
+    var el=document.getElementById('button-cancel')
+    el.addEventListener('click',
+			(event)=>{
+			    this.hide_dialog.call(this);
+			});
+    el=document.getElementById('button-close')
+    el.addEventListener('click',
+			(event)=>{
+			    this.hide_dialog.call(this);
+			});
+}
+
 View.prototype._prepair_draw_dialog=function(html)
 {
     var el=document.getElementById('overray')
@@ -495,8 +528,11 @@ View.prototype._registorate_html=function()
 `;
 }
 
-View.prototype._submit_html=function(date,number)
+View.prototype._submit_html=function(date,number,note)
 {
+    if(!note)
+	note='';
+	
     return `
 <div class='dialog'>
 <p class='dialog-header'><i id='button-close' class="fas fa-times-circle"></i></p>
@@ -507,7 +543,7 @@ View.prototype._submit_html=function(date,number)
 <dt class='entry-num'>人数</dt>
 <dd class='entry-num'><input class='input' id='entry-num' value='${number}' required='required' pattern="^[0-9]+$"></input></dd>
 <dt class='note'>備考</dt>
-<dd class='note'><input class='input' id='note'></input></dd>
+<dd class='note'><input class='input' id='note' value='${note.escapeHTML()}'></input></dd>
 <dd class='withdraw'><input class='button' id='button-withdraw' type='button' value='参加取り消し'></input>
 </dl>
 <p id='login-message'></p>
@@ -520,6 +556,8 @@ View.prototype._submit_html=function(date,number)
 }
 View.prototype._submit_with_login_html=function(date,email='')
 {
+    email=email.escapeHTML();
+
     return `
 <div class='dialog'>
 <p class='dialog-header'><i id='button-close' class="fas fa-times-circle"></i></p>
@@ -567,6 +605,18 @@ View.prototype._accepted_html=function(date,email='')
 <p>前日に中止の連絡が無い場合は，<a href='http://officebarbecue.jp/kattefes/volunteers.html' target='_blank'>災害ボランティア情報のページ</a>を参照の上，当日10:45に相模湖地域事務所ボランティアセンターに集合ください。</p>
 
 <p>申し込み日の参加人数が3名に満たない場合，および悪天候などの場合は中止になります。</p>
+<p class='buttons'>
+<input class='button' id='button-cancel' type='button' value='確認'></input>
+</p>
+</div>
+`;
+}
+View.prototype._deleted_html=function(date,email='')
+{
+    return `
+<div class='dialog'>
+<p class='dialog-header'><i id='button-close' class="fas fa-times-circle"></i></p>
+<h2>削除しました</h2>
 <p class='buttons'>
 <input class='button' id='button-cancel' type='button' value='確認'></input>
 </p>
