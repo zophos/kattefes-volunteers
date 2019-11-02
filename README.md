@@ -1,6 +1,6 @@
 # 災害復旧ボランティア登録システム
 
-NISHI, Takao <zophos@koka-in.org>
+NISHI, Takao <zophos@tsubuan.dev>
 
 ## Dependencies
 
@@ -9,7 +9,7 @@ NISHI, Takao <zophos@koka-in.org>
  + Ruby >=2.1.5
    + sinatra
    + sinatra-contrib
-   + sqlite3 (build with --with-sqlcipher option)
+   + sqlite3 (require built with --with-sqlcipher option for encrypted database)
    + sequel
 
 ## Run
@@ -23,7 +23,7 @@ NISHI, Takao <zophos@koka-in.org>
 or create encrypted database
 
 ~~~
- $ DB_KEY=hogehoge  app/db/create_db.sh
+ $ DB_KEY=hogehoge app/db/create_db.sh
 ~~~
 
 ### Execute
@@ -39,9 +39,40 @@ For running with encrypted database, set database key to DB_KEY environment vari
  $ HTTP_ID=foo HTTP_KEY=bar DB_KEY=hogehoge app/main.rb
 ~~~
 
+#### Options
+
+##### Command-line options
+
+See "Command Line" section on [Sinatra:README](http://sinatrarb.com/intro.html).
+
+##### Environment variables
+
+<dl>
+<dt>MAIL_TO</dt>
+<dd>Mail address for a nortification recipient. Default: null (no mail is sent)</dd>
+
+<dt>MAIL_FROM</dt>
+<dd>Mail address for a nortification sender. Default: $USER@$HOST (and it's not good for mail address)</dd>
+
+<dt>SMTP_HOST</dt>
+<dd>SMTP hostname or IP address. Default: localhost</dd>
+
+<dt>SMTP_PORT</dt>
+<dd>SMTP port number. Default: 25</dd>
+
+<dt>HTTP_ID</dt>
+<dd>ID for administration page authentication. Default: null (nobody allowed).</dd>
+
+<dt>HTTP_KEY</dt>
+<dd>Password for administration page authentication. Default: null (nobody allowed).</dd>
+
+<dt>DB_KEY</dt>
+<dd>Database decryption key. Default: null</dd>
+</dl>
+
 ### Access
 
-http://localhost:4567/ for voting
+http://localhost:4567/ for registrating.
 
 http://localhost:4567/admin/ for administrating (will be required HTTP_ID/HTTP_KEY)
 
