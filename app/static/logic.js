@@ -2,7 +2,7 @@
 // logic.js
 //
 //
-// Time-stamp: <2019-11-02 20:04:54 zophos>
+// Time-stamp: <2019-11-03 10:42:53 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -464,8 +464,17 @@ View.prototype.draw_deleted_dialog=function()
 View.prototype._prepair_draw_dialog=function(html)
 {
     var el=document.getElementById('overray')
+    el.style.paddingTop=null;
     el.innerHTML=html;
     el.style.display='flex';
+
+    dialog=el.getElementsByTagName('div')[0];
+    if(!dialog)
+	return;
+
+    var y=dialog.getClientRects()[0].top;
+    if(y<=0)
+	el.style.paddingTop=(-y)+'px';
 }
 
 
@@ -476,8 +485,6 @@ View.prototype._build_date_str=function(date)
     var d=date.slice(-2);
     var _date=new Date(y,m-1,d);
     var wday=this.calendar._WDAY[_date.getDay()];
-
-    console.log([y,m,d,wday,_date,_date.getDay()]);
 
     return `${y}/${m}/${d} (${wday.capitalize()}.)`;
 }

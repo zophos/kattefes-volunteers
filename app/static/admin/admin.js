@@ -2,7 +2,7 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-11-02 20:06:00 zophos>
+// Time-stamp: <2019-11-03 10:42:55 zophos>
 //
 
 function View()
@@ -256,8 +256,17 @@ View.prototype.submit_dialog_values=function()
 View.prototype._prepair_draw_dialog=function(html)
 {
     var el=document.getElementById('overray')
+    el.style.paddingTop=null;
     el.innerHTML=html;
     el.style.display='flex';
+
+    dialog=el.getElementsByTagName('div')[0];
+    if(!dialog)
+	return;
+
+    var y=dialog.getClientRects()[0].top;
+    if(y<=0)
+	el.style.paddingTop=(-y)+'px';
 }
 
 View.prototype._build_date_str=function(date)
