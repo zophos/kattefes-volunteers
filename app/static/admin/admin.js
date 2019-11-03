@@ -2,7 +2,7 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-11-03 10:42:55 zophos>
+// Time-stamp: <2019-11-03 22:42:34 zophos>
 //
 
 function View()
@@ -265,8 +265,11 @@ View.prototype._prepair_draw_dialog=function(html)
 	return;
 
     var y=dialog.getClientRects()[0].top;
-    if(y<=0)
+    if(y<=0){
 	el.style.paddingTop=(-y)+'px';
+	el.style.height=
+	    (document.body.getClientRects()[0].height+y)+'px';
+    }
 }
 
 View.prototype._build_date_str=function(date)

@@ -2,7 +2,7 @@
 // logic.js
 //
 //
-// Time-stamp: <2019-11-03 10:42:53 zophos>
+// Time-stamp: <2019-11-03 22:40:45 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -472,9 +472,12 @@ View.prototype._prepair_draw_dialog=function(html)
     if(!dialog)
 	return;
 
-    var y=dialog.getClientRects()[0].top;
-    if(y<=0)
+    var y=el.getClientRects()[0].top;
+    if(y<=0){
 	el.style.paddingTop=(-y)+'px';
+	el.style.height=
+	    (document.body.getClientRects()[0].height+y)+'px';
+    }
 }
 
 
