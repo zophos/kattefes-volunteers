@@ -2,7 +2,7 @@
 // logic.js
 //
 //
-// Time-stamp: <2019-11-04 00:20:49 zophos>
+// Time-stamp: <2019-11-04 00:59:11 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -463,9 +463,9 @@ View.prototype.draw_deleted_dialog=function()
 
 View.prototype._prepair_draw_dialog=function(html)
 {
-    var el=document.getElementById('overray')
-    el.style.paddingTop=null;
-    el.style.paddingLeft=null;
+    var el=document.getElementById('overray');
+    el.style.paddingTop='0px';
+    el.style.height='100%';
     el.innerHTML=html;
     el.style.display='block';
 
@@ -474,15 +474,7 @@ View.prototype._prepair_draw_dialog=function(html)
 	return;
 
     var rect=dialog.getClientRects()[0];
-
-    var left=(document.documentElement.clientWidth-rect.width)/2;
-    if(left<0)
-	left=0;
-    left+=window.pageXOffset;
-    el.style.paddingLeft=left+'px';
-    el.style.width=
-	(document.documentElement.getClientRects()[0].width-left)+'px';
-
+ 
     var top=(document.documentElement.clientHeight-rect.height)/2;
     if(top<0)
 	top=0;
