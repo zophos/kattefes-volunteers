@@ -262,7 +262,7 @@ _EOS_
         return ret||{}
     end
 
-    def admin_update(date,status,num)
+    def admin_update(date,status,num,&on_succeed)
         (y,m,d)=_validate_date(date)
         return nil unless y
 
@@ -277,10 +277,19 @@ _EOS_
             status_code=status_code[0][:status_code]
         end
 
+        rows=[]
         @db.run('begin')
         @db.fetch("update date_statuses set status_code=0 where date=?",
                   date).all
         num.each{|email,n|
+            sql=<<_EOS_
+select date,email,number as num,note from schedules where (date=? and email=?)
+_EOS_
+            row=@db.fetch(sql,date,email).all[0].dup
+            row[:old_num]=row[:num]
+            row[:new_num]=n
+            rows.push(row)
+
             if(n>0)
                 sql=<<_EOS_
 update schedules set number=? where date=? and email=?
@@ -295,6 +304,8 @@ _EOS_
         @db.fetch("insert or replace into date_statuses values(?,?)",
                   date,status_code).all
         @db.run('commit')
+
+        yield(rows) if((!rows.empty?) && on_succeed)
 
         _get_adate(date)
     end

@@ -355,7 +355,34 @@ post "#{settings.mount_point}/admin/list/:cal_id" do
 
     data=db.admin_update(date,
                          params['status'],
-                         params['num'])
+                         params['num']){|rows|
+        diff=[]
+        rows.each{|row|
+            info=db.email2memberinfo(row[:email])
+            next unless info
+
+            @name=info[:name]
+            @email=row[:email]
+            @phone=info[:phone]
+            @old_num=row[:old_num]
+            @new_num=row[:new_num]
+            @note=row[:note]
+
+            diff.push(erb(:mail_admin_item))
+        }
+
+        next if diff.empty?
+
+        @date=format_date(date)
+        @items=diff
+        @body=erb(:mail_admin_body)
+        
+        @from=settings.mail_from
+        @to=settings.mail_to
+        @subject=erb(:mail_subject)
+
+        sendmail(erb(:mail))
+    }
 
     return 400 unless data
 
