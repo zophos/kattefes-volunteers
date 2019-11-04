@@ -13,6 +13,7 @@ Calendar.prototype.set_cell_content=function(date,body)
     var td=el.getElementsByTagName('td')[0]
     if(!td)
 	return;
+    td.classList.remove('you');
     td.innerText='';
 
     if('status' in body)
