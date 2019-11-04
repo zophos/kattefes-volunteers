@@ -2,21 +2,15 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-11-04 00:58:55 zophos>
+// Time-stamp: <2019-11-04 10:47:30 zophos>
 //
 
-function View()
+View.prototype._setup=function()
 {
-    this.calendar=new Calendar(document.getElementById('cal-div'),
-			       {'class':'cal'});
-
     this.calendar.on_cell_click=function(event,cell){
 	var date=cell.id.replace(`${this.id_prefix}-d`,'');
 	document.view.draw_detail_dialog(date);
     }
-
-    this._RELOAD_DURATION=300000; // 5min
-    this._reload_timer=null;
 
     this.calendar.on_draw=function(year,month){
 	if(document.view && document.view._reload_timer){
@@ -58,8 +52,6 @@ function View()
     }
 
     this._record_is_changed=false;
-
-    this.calendar.draw();
 }
 View.prototype.draw_detail_dialog=function(date)
 {
@@ -158,14 +150,6 @@ View.prototype.draw_detail_dialog=function(date)
 			    this.hide_dialog.call(this);
 			});
 }
-View.prototype.hide_dialog=function()
-{
-    var el=document.getElementById('overray')
-    el.style.display='none';
-
-    this.unset_dialog_is_changed();
-    el.innerHTML=null;
-}
 View.prototype.unset_dialog_is_changed=function()
 {
     if(!this._record_is_changed)
@@ -229,6 +213,7 @@ View.prototype.submit_dialog_values=function()
 	status:status,
 	num:num
     }
+    console.log(req_body);
     fetch(`./list/${date}`,
 	  {method:'POST',
 	   headers:new Headers({'Accept':'application/json',
@@ -251,40 +236,6 @@ View.prototype.submit_dialog_values=function()
 		  document.view.calendar.set_cell_content(k,json[k]);
 	      });
 	  });
-}
-
-View.prototype._prepair_draw_dialog=function(html)
-{
-    var el=document.getElementById('overray');
-    el.style.paddingTop='0px';
-    el.style.height='100%';
-    el.innerHTML=html;
-    el.style.display='block';
-
-    dialog=el.getElementsByTagName('div')[0];
-    if(!dialog)
-	return;
-
-    var rect=dialog.getClientRects()[0];
-
-    var top=(document.documentElement.clientHeight-rect.height)/2;
-    if(top<0)
-	top=0;
-    top+=window.pageYOffset;
-    el.style.paddingTop=top+'px';
-    el.style.height=
-	(document.documentElement.getClientRects()[0].height-top)+'px';
-}
-
-View.prototype._build_date_str=function(date)
-{
-    var y=date.slice(0,4);
-    var m=date.slice(4,6);
-    var d=date.slice(-2);
-    var _date=new Date(y,m-1,d);
-    var wday=this.calendar._WDAY[_date.getDay()];
-
-    return `${y}/${m}/${d} (${wday.capitalize()}.)`;
 }
 
 View.prototype._detail_html=function(date)

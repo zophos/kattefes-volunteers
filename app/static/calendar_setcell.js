@@ -3,9 +3,10 @@ Calendar.prototype.set_cell_content=function(date,body)
     var el=this.cell(date);
     if(!el)
 	return;
+
     el.classList.remove('open');
     el.classList.remove('closed');
-    el.classList.remove('canceld');
+    el.classList.remove('canceled');
     el.removeAttribute('data-you');
     el.removeAttribute('data-note');
 
@@ -14,9 +15,12 @@ Calendar.prototype.set_cell_content=function(date,body)
 	return;
 
     if('all' in body){
-	td.innerText=parseInt(body['all'],10);
-	if(body['all']>=4)
-	    td.classList.add('go');
+	var n=parseInt(body['all'],10)
+	if(n>0){
+	    td.innerText=n;
+	    if(body['all']>=4)
+		td.classList.add('go');
+	}
     }
     else{
 	td.innerText='';

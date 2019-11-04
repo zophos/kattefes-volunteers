@@ -1,28 +1,12 @@
 //
-// logic.js
+// view_member.js
 //
 //
-// Time-stamp: <2019-11-04 00:59:11 zophos>
+// Time-stamp: <2019-11-04 09:42:10 zophos>
 //
 
-String.prototype.escapeHTML=function()
+View.prototype._setup=function()
 {
-  return this.replace(/[&'`"<>]/g,(m)=>{
-      return {'&':'&amp;',
-	      "'":'&#x27;',
-	      '`':'&#x60;',
-	      '"':'&quot;',
-	      '<':'&lt;',
-	      '>':'&gt;'}[m]
-  });
-}
-
-
-function View()
-{
-    this.calendar=new Calendar(document.getElementById('cal-div'),
-			       {'class':'cal'});
-
     this.calendar.on_cell_click=function(event,cell){
 	var c_list=cell.classList;
 	if(c_list.contains('oom') ||
@@ -44,9 +28,6 @@ function View()
 		date,
 		localStorage.getItem('email')||'');
     }
-
-    this._RELOAD_DURATION=300000; // 5min
-    this._reload_timer=null;
 
     this.calendar.on_draw=function(year,month){
 	if(document.view && document.view._reload_timer){
@@ -137,8 +118,6 @@ function View()
     }
     else
 	this.set_loggedout();
-
-    this.calendar.draw();
 }
 
 View.prototype.set_loggedin=function()
@@ -157,12 +136,6 @@ View.prototype.set_loggedout=function()
     this.calendar.draw();
 }
 
-View.prototype.hide_dialog=function()
-{
-    var el=document.getElementById('overray')
-    el.style.display='none';
-    el.innerHTML=null;
-}
 View.prototype.draw_login_dialog=function()
 {
     this._prepair_draw_dialog(this._login_html());
@@ -482,18 +455,6 @@ View.prototype._prepair_draw_dialog=function(html)
     el.style.paddingTop=top+'px';
     el.style.height=
 	(document.documentElement.getClientRects()[0].height-top)+'px';
-}
-
-
-View.prototype._build_date_str=function(date)
-{
-    var y=date.slice(0,4);
-    var m=date.slice(4,6);
-    var d=date.slice(-2);
-    var _date=new Date(y,m-1,d);
-    var wday=this.calendar._WDAY[_date.getDay()];
-
-    return `${y}/${m}/${d} (${wday.capitalize()}.)`;
 }
 
 View.prototype._login_html=function()
