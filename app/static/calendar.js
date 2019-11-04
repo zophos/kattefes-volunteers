@@ -2,7 +2,7 @@
 // calendar.js
 //
 //
-// Time-stamp: <2019-11-01 09:31:08 zophos>
+// Time-stamp: <2019-11-04 17:46:24 zophos>
 //
 
 //
@@ -66,9 +66,17 @@ function Calendar(parentNode,
 Calendar.prototype.draw=function(year=null,month=null)
 {
     this.today=new Date();
-    if(year==null || month==null){
-	year=this.today.getFullYear();
-	month=this.today.getMonth();
+    if(year==null){
+	if(this.currentYear==null)
+	    year=this.today.getFullYear();
+	else
+	    year=this.currentYear;
+    }
+    if(month==null){
+	if(this.currentMonth==null)
+	    month=this.today.getMonth();
+	else
+	    month=this.currentMonth;
     }
 
     this.currentYear=year;

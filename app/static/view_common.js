@@ -2,7 +2,7 @@
 // view_common.js
 //
 //
-// Time-stamp: <2019-11-04 09:48:06 zophos>
+// Time-stamp: <2019-11-04 18:06:07 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -29,7 +29,22 @@ function View()
     if(typeof(this._setup)=="function")
 	this._setup();
 
-    this.calendar.draw();
+    var queries=this._split_queries();
+    var y=null;
+    var m=null;
+    var re=/([0-9]{4})([0-1][0-9])/;
+    Object.keys(queries).find((k)=>{
+	var match=k.match(re);
+	if(match){
+	    y=match[1];
+	    m=match[2];
+	    return true;
+	}
+    },this);
+    if(y&&m)
+	this.calendar.draw(y,m-1);
+    else
+	this.calendar.draw();
 }
 
 View.prototype.hide_dialog=function()
@@ -71,4 +86,24 @@ View.prototype._build_date_str=function(date)
     var wday=this.calendar._WDAY[_date.getDay()];
 
     return `${y}/${m}/${d} (${wday.capitalize()}.)`;
+}
+View.prototype._split_queries=function()
+{
+    var ret={};
+    if(!window.location.search)
+	return ret;
+
+    var queries=window.location.search.slice(1);
+    if(!queries)
+	return ret;
+
+    queries.split('&').forEach((query)=>{
+	var q=query.split('=');
+	if(q[1])
+	    ret[q[0].trim()]=q[1].trim()
+	else
+	    ret[q[0].trim()]=q[1]
+    })
+
+    return ret;
 }
