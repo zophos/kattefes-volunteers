@@ -14,6 +14,7 @@ Calendar.prototype.set_cell_content=function(date,body)
     if(!td)
 	return;
     td.classList.remove('you');
+    td.classList.remove('go');
     td.innerText='';
 
     if('status' in body)
