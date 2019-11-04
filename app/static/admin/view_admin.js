@@ -2,7 +2,7 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-11-04 10:47:30 zophos>
+// Time-stamp: <2019-11-04 11:21:25 zophos>
 //
 
 View.prototype._setup=function()
@@ -213,7 +213,6 @@ View.prototype.submit_dialog_values=function()
 	status:status,
 	num:num
     }
-    console.log(req_body);
     fetch(`./list/${date}`,
 	  {method:'POST',
 	   headers:new Headers({'Accept':'application/json',

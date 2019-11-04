@@ -9,27 +9,28 @@ Calendar.prototype.set_cell_content=function(date,body)
     el.classList.remove('canceled');
     el.removeAttribute('data-you');
     el.removeAttribute('data-note');
-
+    
     var td=el.getElementsByTagName('td')[0]
     if(!td)
 	return;
+    td.innerText='';
+
+    if('status' in body)
+	el.classList.add(body['status']);
 
     if('all' in body){
 	var n=parseInt(body['all'],10)
 	if(n>0){
 	    td.innerText=n;
-	    if(body['all']>=4)
+	    if(n>=4)
 		td.classList.add('go');
 	}
+	else
+	    return;
     }
-    else{
-	td.innerText='';
+    else
 	return;
-    }
-
-    if('status' in body)
-	el.classList.add(body['status']);
-
+    
     if('you' in body && body['you']>0){
 	td.classList.add('you');
 	el.setAttribute('data-you',body['you']);

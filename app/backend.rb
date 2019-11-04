@@ -248,13 +248,15 @@ _EOS_
                 'num'=>0,
                 'members'=>[]
             }
-            ret['num']+=row[:num]
-            ret['members'].push(
-                {'email'=>row[:email],
-                 'name'=>row[:name],
-                 'num'=>row[:num],
-                 'phone'=>row[:phone],
-                 'note'=>row[:note]})
+            if(row[:num].to_i>0)
+                  ret['num']+=row[:num].to_i
+                  ret['members'].push(
+                      {'email'=>row[:email],
+                       'name'=>row[:name],
+                       'num'=>row[:num],
+                       'phone'=>row[:phone],
+                       'note'=>row[:note]})
+            end
         }
 
         return ret||{}
@@ -290,8 +292,8 @@ _EOS_
             end
         }
 
-        @db.fetch("update date_statuses set status_code=? where date=?",
-                  status_code,date).all
+        @db.fetch("insert or replace into date_statuses values(?,?)",
+                  date,status_code).all
         @db.run('commit')
 
         _get_adate(date)
@@ -369,7 +371,7 @@ _EOS_
     end
 
     def _get_adate(date,email=nil)
-        ret={}
+        ret={'status'=>'open'}
 
         sql=<<_EOS_
 select * from aggregated_schedules where date=?
@@ -378,7 +380,7 @@ _EOS_
             ret[row[:date]]={'all'=>row[:num],
                              'status'=>row[:status]}
         }
-
+        
         if(email)
             sql=<<_EOS_
 select date, number as num,note from schedules

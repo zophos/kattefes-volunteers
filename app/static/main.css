@@ -2,7 +2,7 @@
 // Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
 // kattefes@officebarbecue.jp
 //
-// Time-stamp: "2019-11-04 00:59:50 zophos"
+// Time-stamp: "2019-11-04 11:13:00 zophos"
 */
 html,
 body{
@@ -128,11 +128,13 @@ table.cal td table.nhd th{
     background-color:#f0d0d0;
 }
 table.cal td table.oom th,
+table.cal td table.closed th,
 table.cal td table.canceled th{
     background-color:#d0d0d0;
     color:#909090;
 }
 table.cal td table.oom td,
+table.cal td table.closed td,
 table.cal td table.canceled td{
     background-color:#e0e0e0;
     color:#909090;
