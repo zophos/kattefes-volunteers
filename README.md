@@ -1,6 +1,21 @@
-# A Simple Reservation Management System
+# A Simple Booking Manager
 
 NISHI, Takao <zophos@tsubuan.dev>
+
+## What's this?
+
+This program is useful for daily booking management tasks that record
+names, email addresses, phone numbers, number of people, and notes.
+
+All users can see the total number of people booked and whether they can book.
+
+Users who make reservations can edit their own reservation information if it is
+not closed.
+
+Administrators can edit the number of reservations and set the daily status to
+"Full" or "Not acceptable".
+
+That's all ;-P
 
 ## Dependencies
 
@@ -78,6 +93,14 @@ See "Command Line" section on [Sinatra:README](http://sinatrarb.com/intro.html).
 http://localhost:4567/ for registrating.
 
 http://localhost:4567/admin/ for administrating (will be required HTTP_ID/HTTP_KEY)
+
+### Migration
+
+If you met problems after git pull, drop all views and triggers from the DB and
+recreate them.
+These operations will not cause any data loss.
+
+You can find all views and triggers definition at [app/db/tables.sql](./blob/master/app/db/tables.sql) .
 
 
 ## License
