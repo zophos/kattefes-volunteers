@@ -2,7 +2,7 @@
 // view_member.js
 //
 //
-// Time-stamp: <2019-11-04 18:23:07 zophos>
+// Time-stamp: <2019-11-04 22:20:43 zophos>
 //
 
 View.prototype._setup=function()
@@ -441,29 +441,6 @@ View.prototype.draw_deleted_dialog=function()
 			});
 }
 
-View.prototype._prepair_draw_dialog=function(html)
-{
-    var el=document.getElementById('overray');
-    el.style.paddingTop='0px';
-    el.style.height='100%';
-    el.innerHTML=html;
-    el.style.display='block';
-
-    dialog=el.getElementsByTagName('div')[0];
-    if(!dialog)
-	return;
-
-    var rect=dialog.getClientRects()[0];
- 
-    var top=(document.documentElement.clientHeight-rect.height)/2;
-    if(top<0)
-	top=0;
-    top+=window.pageYOffset;
-    el.style.paddingTop=top+'px';
-    el.style.height=
-	(document.documentElement.getClientRects()[0].height-top)+'px';
-}
-
 View.prototype._login_html=function()
 {
     return `
@@ -558,7 +535,7 @@ View.prototype._submit_with_login_html=function(date,email='')
 <li class='tab on' id='dialog-tab-login'>ログイン</li>
 <li class='tab' id='dialog-tab-signup'>新規代表者登録</li>
 </ul>
-<dl class='login' id='login-or-signup'>
+<dl id='login-or-signup'>
 <dt class='name'>氏名</dt>
 <dd class='name'><input class='input' id='name'></input></dd>
 <dt>メールアドレス</dt>

@@ -2,7 +2,7 @@
 // view_common.js
 //
 //
-// Time-stamp: <2019-11-04 18:06:07 zophos>
+// Time-stamp: <2019-11-04 22:11:59 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -41,8 +41,11 @@ function View()
 	    return true;
 	}
     },this);
-    if(y&&m)
-	this.calendar.draw(y,m-1);
+    if(y&&m){
+	var _date=new Date(y,m-1,1);
+
+	this.calendar.draw(_date.getFullYear(),_date.getMonth());
+    }
     else
 	this.calendar.draw();
 }
