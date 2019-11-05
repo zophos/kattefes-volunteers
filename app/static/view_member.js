@@ -2,7 +2,7 @@
 // view_member.js
 //
 //
-// Time-stamp: <2019-11-04 22:20:43 zophos>
+// Time-stamp: <2019-11-06 00:41:34 zophos>
 //
 
 View.prototype._setup=function()
@@ -413,6 +413,8 @@ View.prototype.draw_submit_with_login_dialog=function(date,email='')
 View.prototype.draw_accepted_dialog=function()
 {
     this._prepair_draw_dialog(this._accepted_html());
+    document.getElementById('dialog-body').innerHTML=
+	document.getElementById('important-notice').innerHTML;
 
     var el=document.getElementById('button-cancel')
     el.addEventListener('click',
@@ -561,11 +563,8 @@ View.prototype._accepted_html=function(date,email='')
 <div class='dialog'>
 <p class='dialog-header'><i id='button-close' class="fas fa-times-circle"></i></p>
 <h2>登録しました</h2>
-<p>申し込み日の参加人数が計4名以上で決行する予定です。</p>
-
-<p>前日に中止の連絡が無い場合は，<a href='http://officebarbecue.jp/kattefes/volunteers.html' target='_blank'>災害ボランティア情報のページ</a>を参照の上，当日10:45に相模湖地域事務所ボランティアセンターに集合ください。</p>
-
-<p>申し込み日の参加人数が3名に満たない場合，および悪天候などの場合は中止になります。</p>
+<div id='dialog-body'>
+</div>
 <p class='buttons'>
 <input class='button' id='button-cancel' type='button' value='確認'></input>
 </p>
