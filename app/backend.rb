@@ -1,6 +1,8 @@
 require 'openssl'
 require 'sequel'
 require 'nkf'
+require 'logger'
+
 class DB
     SESSION_EXPIRE_SEC=86400*90
  
@@ -16,6 +18,19 @@ class DB
 
     def test
         @db.run("select ssid from sessions limit 1")
+    end
+
+    def start_logging(progname,logfile)
+        if(@db.loggers.empty?)
+            @db.logger=Logger.new(logfile,'daily',progname:progname)
+        else
+            @db.loggers[0].progname=progname
+        end
+        self
+    end
+
+    def stop_logging()
+        @db.logger=nil
     end
 
     def login(email,passwd,client_ip='')
