@@ -2,7 +2,7 @@
 // calendar.js
 //
 //
-// Time-stamp: <2019-11-04 17:46:24 zophos>
+// Time-stamp: <2019-11-06 10:00:38 zophos>
 //
 
 //
@@ -66,6 +66,7 @@ function Calendar(parentNode,
 Calendar.prototype.draw=function(year=null,month=null)
 {
     this.today=new Date();
+    this.today.setHours(0,0,0,0);
     if(year==null){
 	if(this.currentYear==null)
 	    year=this.today.getFullYear();
@@ -235,6 +236,8 @@ Calendar.prototype._build_week=function(year,month,start_date)
     var tr=document.createElement('tr');
     tr.setAttribute('class','day');
     
+    var _yesterday=this.to
+
     var date=new Date(year,month,start_date);
     this._WDAY.forEach((wday)=>{
 	var y=date.getFullYear();
