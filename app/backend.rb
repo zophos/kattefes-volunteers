@@ -20,12 +20,15 @@ class DB
         @db.run("select ssid from sessions limit 1")
     end
 
-    def start_logging(progname,logfile)
-        if(@db.loggers.empty?)
-            @db.logger=Logger.new(logfile,'daily',progname:progname)
-        else
-            @db.loggers[0].progname=progname
+    def start_logging(logfile,progname)
+        if(logfile)
+            if(@db.loggers.empty?)
+                @db.logger=Logger.new(logfile,'daily',progname:progname)
+            else
+                @db.loggers[0].progname=progname
+            end
         end
+
         self
     end
 

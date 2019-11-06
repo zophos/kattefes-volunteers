@@ -60,6 +60,7 @@ _EOS_
     set :mail_from,ENV['MAIL_FROM']||"#{ENV['USER']}@#{Socket.gethostname}"
     set :mail_to,ENV['MAIL_TO']
 
+    set :logfile,ENV['LOGFILE']
 end
 
 helpers do
@@ -67,7 +68,15 @@ helpers do
         @db_uri||=settings.db_uri
         @db_key||=settings.db_key
 
-        DB.new(@db_uri,@db_key)
+        path=request.path
+        path+="?#{request.query_string}" unless request.query_string.empty?
+        DB.new(
+            @db_uri,
+            @db_key).start_logging(settings.logfile,
+                                   '%s => "%s %s"'%[
+                                       request.ip,
+                                       request.request_method,
+                                       path])
     end
 
     def protect!
@@ -193,11 +202,11 @@ end
 get "#{settings.mount_point}/api/:cal_id" do
     return 400 if params['cal_id']!~/^\d{6}$/
 
-    @db=db
-    data=@db.get(params['cal_id'],cookies[:ssid])
+    _db=db
+    data=_db.get(params['cal_id'],cookies[:ssid])
     return 400 unless data
 
-    if(cookies[:ssid] && @db.ssid2email(cookies[:ssid]))
+    if(cookies[:ssid] && _db.ssid2email(cookies[:ssid]))
         response.set_cookie :ssid,{:value=>cookies[:ssid],
                                    :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
                                    :path=>"#{settings.mount_point}/",
@@ -218,14 +227,14 @@ post "#{settings.mount_point}/api/:cal_id" do
     return 400 unless keys.include?('num')
 
     ssid=cookies[:ssid]
-    @db=db
+    _db=db
     unless(ssid)
         ['email','passwd'].each{|k|
             return 401 unless keys.include?(k)
         }
-        ssid=@db.login(params['email'],
-                               params['passwd'],
-                               request.ip)
+        ssid=_db.login(params['email'],
+                       params['passwd'],
+                       request.ip)
         
         unless(ssid)
             ['name','phone'].each{|k|
@@ -234,11 +243,11 @@ post "#{settings.mount_point}/api/:cal_id" do
                     return 401
                 end
             }
-            ssid=@db.reg_member(params['email'],
-                                        params['name'],
-                                        params['phone'],
-                                        params['passwd'],
-                                        request.ip)
+            ssid=_db.reg_member(params['email'],
+                                params['name'],
+                                params['phone'],
+                                params['passwd'],
+                                request.ip)
             unless ssid
                 sleep(3)
                 return 409 
@@ -246,7 +255,7 @@ post "#{settings.mount_point}/api/:cal_id" do
         end
     end
 
-    data=@db.post(ssid,
+    data=_db.post(ssid,
                   cal_id,
                   params['num'],
                   params['note']){|date,email,num,note|
