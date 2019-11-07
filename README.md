@@ -67,10 +67,10 @@ See "Command Line" section on [Sinatra:README](http://sinatrarb.com/intro.html).
 
 <dl>
 <dt>MAIL_TO</dt>
-<dd>Mail address for a nortification recipient. Default: nil (no mail is sent)</dd>
+<dd>Mail address of a nortification recipient. Default: nil (no mail is sent)</dd>
 
 <dt>MAIL_FROM</dt>
-<dd>Mail address for a nortification sender. Default: $USER@$HOST (and it's not good for mail address)</dd>
+<dd>Mail address of a nortification sender. Default: $USER@$HOST (and it's not good for mail address)</dd>
 
 <dt>SMTP_HOST</dt>
 <dd>SMTP hostname or IP address. Default: localhost</dd>
@@ -97,7 +97,7 @@ This means that anyone who can read the log can read sensitive data, even if the
 
 http://localhost:4567/ for registrating.
 
-http://localhost:4567/admin/ for administrating (will be required HTTP_ID/HTTP_KEY)
+http://localhost:4567/admin/ for administrating (will be required HTTP_AUTH_USER/HTTP_AUTH_PASS)
 
 ### Migration
 
