@@ -2,7 +2,7 @@
 // view_common.js
 //
 //
-// Time-stamp: <2019-11-04 22:11:59 zophos>
+// Time-stamp: <2019-11-07 17:59:11 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -17,6 +17,30 @@ String.prototype.escapeHTML=function()
   });
 }
 
+//
+// detect browser tab switching status
+//
+// https://stackoverflow.com/questions/19519535/detect-if-browser-tab-is-active-or-user-has-switched-away
+//
+var onVisibilityChange=(()=>{
+    var stateKey, eventKey, keys = {
+        hidden: "visibilitychange",
+        webkitHidden: "webkitvisibilitychange",
+        mozHidden: "mozvisibilitychange",
+        msHidden: "msvisibilitychange"
+    };
+    for(stateKey in keys){
+        if (stateKey in document) {
+            eventKey = keys[stateKey];
+            break;
+        }
+    }
+    return (c)=>{
+        if(c)
+	    document.addEventListener(eventKey, c);
+        return !document[stateKey];
+    }
+})();
 
 function View()
 {
@@ -48,6 +72,14 @@ function View()
     }
     else
 	this.calendar.draw();
+
+    //
+    // redraw when tab is redisplayed.
+    //
+    onVisibilityChange(()=>{
+	if(onVisibilityChange())
+	    this.calendar.draw();
+    });
 }
 
 View.prototype.hide_dialog=function()
