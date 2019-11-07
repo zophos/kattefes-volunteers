@@ -67,7 +67,7 @@ See "Command Line" section on [Sinatra:README](http://sinatrarb.com/intro.html).
 
 <dl>
 <dt>MAIL_TO</dt>
-<dd>Mail address for a nortification recipient. Default: null (no mail is sent)</dd>
+<dd>Mail address for a nortification recipient. Default: nil (no mail is sent)</dd>
 
 <dt>MAIL_FROM</dt>
 <dd>Mail address for a nortification sender. Default: $USER@$HOST (and it's not good for mail address)</dd>
@@ -85,7 +85,12 @@ See "Command Line" section on [Sinatra:README](http://sinatrarb.com/intro.html).
 <dd>Password for administration page authentication. Default: automatic generated 32 random charactors. (shown to STDERR).</dd>
 
 <dt>DB_KEY</dt>
-<dd>Database decryption key. Default: null</dd>
+<dd>Database decryption key. Default: nil</dd>
+
+<dt>DB_LOG_FILE</dt>
+<dd>Database log file name. Default: nil (log is NOT recorded). When '-' is given, DB log is written to STDERR.<br>
+Note that DB_LOG_FILE consists every SQL these issued on this system.
+This means that anyone who can read the log can read sensitive data, even if database was encrypted.</dd>
 </dl>
 
 ### Access
