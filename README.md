@@ -88,9 +88,9 @@ See "Command Line" section on [Sinatra:README](http://sinatrarb.com/intro.html).
 <dd>Database decryption key. Default: nil</dd>
 
 <dt>DB_LOG_FILE</dt>
-<dd>Database log file name. Default: nil (log is NOT recorded). When '-' is given, DB log is written to STDERR.<br>
-Note that DB_LOG_FILE consists every SQL these issued on this system.
-This means that anyone who can read the log can read sensitive data, even if database was encrypted.</dd>
+<dd>Database log file name. When '-' is given, DB log is written to STDERR. Default: nil (log is NOT recorded).<br>
+Note that the log contains all raw SQL statements issued by the system.
+This means that anyone who can read the log can read sensitive data, even if the database was encrypted.</dd>
 </dl>
 
 ### Access
