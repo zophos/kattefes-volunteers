@@ -2,7 +2,7 @@
 // view_common.js
 //
 //
-// Time-stamp: <2019-11-07 17:59:11 zophos>
+// Time-stamp: <2019-11-08 16:02:50 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -78,7 +78,7 @@ function View()
     //
     onVisibilityChange(()=>{
 	if(onVisibilityChange())
-	    this.calendar.draw();
+	    this.calendar.on_draw();
     });
 }
 
