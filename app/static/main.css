@@ -2,7 +2,7 @@
 // Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
 // kattefes@officebarbecue.jp
 //
-// Time-stamp: "2019-11-04 22:12:59 zophos"
+// Time-stamp: "2019-11-08 20:54:24 zophos"
 */
 html,
 body{
@@ -224,23 +224,35 @@ p.dialog-header i:hover{
     margin:0;
     padding:0;
     width:100%;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:center;
+    align-content:flex-start;
 }
 #overray .dialog dt{
-    float:left;
-    clear:left;
-    padding:0.5em;
-    width:7em;
+    box-sizing:border-box;
+    margin:.5em auto;
+    padding:.5em 0 0 1.5em;
+    width:20%;
     font-weight:bold;
+    height:3.5em;
 }
 #overray .dialog dd{
-    margin:1em 0 1em 8.5em;
+    box-sizing:border-box;
+    margin:.5em auto;
+    padding:.5em 1.5em 0 0;
+    width:80%;
+    flex-grow:2;
+    height:3.5em;
 }
 #overray .dialog span.input,
 #overray .dialog input.input{
     display:inline-block;
+    box-sizing:border-box;
     font-size:100%;
-    width:95%;
-    height:2.5em;
+    width:100%;
+    height:3em;
     padding:0.25em 1em;
     vertical-align:middle;
 }
@@ -284,25 +296,28 @@ p.dialog-header i:hover{
     box-shadow:3px 3px 2px rgba(0,0,0,0.5) inset;
 }
 #overray .dialog ul.tab{
-    display:flex;
-    margin:2em auto 0;
-    padding:.5em;
-    justify-content: center;
+    margin:0;
+    padding:.5em 2% 0 2%;
 }
 #overray .dialog ul.tab li.tab{
     display:inline-block;
-    margin:1em .15em 0;
-    padding:.5em;
+    width:9em;
+    margin:1em .15em -2px;
+    padding:.5em .5em 0;
+    font-weight:bold;
+    text-align:center;
     border:solid 2px #a0a0a0;
-    border-radius:5px;
-    background-color:#f0f0f0;
-    box-shadow:2px 1px 1px rgba(0,0,0,0.5);
+    background-color:#c0c0c0;
+    border-radius:10px 10px 0 0;
     cursor: pointer;
 }
 #overray .dialog ul.tab li.tab.on{
-    border-color:#a0a0a0;
-    background-color:#90c0a0;
-    box-shadow:2px 1px 1px rgba(0,0,0,0.5) inset;
+    border-bottom:solid 2px #f0f0f0;
+    background-color:#f0f0f0;
+}
+#overray .dialog dl.tab{
+    border:solid 2px rgba(120,120,120,0.75);
+    border-radius:10px;
 }
 #overray .dialog dl.login .name,
 #overray .dialog dl.login .phone,

@@ -2,7 +2,7 @@
 // view_member.js
 //
 //
-// Time-stamp: <2019-11-06 00:41:34 zophos>
+// Time-stamp: <2019-11-08 20:04:31 zophos>
 //
 
 View.prototype._setup=function()
@@ -537,7 +537,7 @@ View.prototype._submit_with_login_html=function(date,email='')
 <li class='tab on' id='dialog-tab-login'>ログイン</li>
 <li class='tab' id='dialog-tab-signup'>新規代表者登録</li>
 </ul>
-<dl id='login-or-signup'>
+<dl class='tab' id='login-or-signup'>
 <dt class='name'>氏名</dt>
 <dd class='name'><input class='input' id='name'></input></dd>
 <dt>メールアドレス</dt>
@@ -593,7 +593,8 @@ View.prototype._set_dialog_as_login=function()
     el=document.getElementById('dialog-tab-signup');
     el.classList.remove('on');
     el=document.getElementById('login-or-signup');
-    el.setAttribute('class','login');
+    el.classList.remove('signup');
+    el.classList.add('login');
 
     this._submit_with_signup=false;
 }
@@ -606,7 +607,8 @@ View.prototype._set_dialog_as_signup=function()
     el=document.getElementById('dialog-tab-signup');
     el.classList.add('on');
     el=document.getElementById('login-or-signup');
-    el.setAttribute('class','signup');
+    el.classList.remove('login');
+    el.classList.add('signup');
 
     this._submit_with_signup=true;
 }
