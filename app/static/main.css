@@ -2,7 +2,7 @@
 // Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
 // kattefes@officebarbecue.jp
 //
-// Time-stamp: "2019-11-08 20:54:24 zophos"
+// Time-stamp: "2019-11-08 21:20:38 zophos"
 */
 html,
 body{
@@ -253,10 +253,12 @@ p.dialog-header i:hover{
     font-size:100%;
     width:100%;
     height:3em;
-    padding:0.25em 1em;
+    padding:0 1em;
     vertical-align:middle;
 }
 #overray .dialog input.input{
+    margin-top:-.25em;
+    padding:0.25em 1em;
     background-color:white;
     border:2px solid gray;
     border-radius:5px;
@@ -316,6 +318,7 @@ p.dialog-header i:hover{
     background-color:#f0f0f0;
 }
 #overray .dialog dl.tab{
+    padding:.5em 0 1em;
     border:solid 2px rgba(120,120,120,0.75);
     border-radius:10px;
 }
