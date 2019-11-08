@@ -39,6 +39,7 @@ configure do
     
     set :db_uri,db_uri
     set :db_key,ENV['DB_KEY']
+    set :db_log,(ENV['DB_LOG_FILE']=='-' ? STDERR : ENV['DB_LOG_FILE'])
 
     #
     # http auth
@@ -59,8 +60,6 @@ _EOS_
 
     set :mail_from,ENV['MAIL_FROM']||"#{ENV['USER']}@#{Socket.gethostname}"
     set :mail_to,ENV['MAIL_TO']
-
-    set :logfile,ENV['LOGFILE']
 end
 
 helpers do
@@ -72,7 +71,7 @@ helpers do
         path+="?#{request.query_string}" unless request.query_string.empty?
         DB.new(
             @db_uri,
-            @db_key).start_logging(settings.logfile,
+            @db_key).start_logging(settings.db_log,
                                    '%s => "%s %s"'%[
                                        request.ip,
                                        request.request_method,
