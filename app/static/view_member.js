@@ -2,7 +2,7 @@
 // view_member.js
 //
 //
-// Time-stamp: <2019-11-09 12:37:25 zophos>
+// Time-stamp: <2019-11-09 12:45:17 zophos>
 //
 
 View.prototype._setup=function()
@@ -343,7 +343,7 @@ View.prototype.draw_submit_with_login_dialog=function(date,email='')
 
     if(email)
 	this._set_dialog_as_login();
-    else{
+    else
 	this._set_dialog_as_signup();
 
     var el=document.getElementById('dialog-tab-login');
