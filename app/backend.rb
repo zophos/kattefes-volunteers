@@ -93,6 +93,91 @@ _EOS_
         @db.fetch(sql,email,_hash(passwd)).all
     end
 
+
+    def update_passwd(email,
+                      old_passwd,
+                      new_passwd,
+                      ssid,
+                      client_ip)
+        email=email.to_s
+        old_passwd=old_passwd.to_s.strip
+        new_passwd=new_passwd.to_s.strip
+        return nil if new_passwd.empty?
+
+        @db.run('begin')
+        sql=<<_EOS_
+select email from members where email=? and passwd=? limit 1
+_EOS_
+        data=@db.fetch(sql,email,_hash(old_passwd)).all[0]
+        if(data)
+            sql=<<_EOS_
+update members set passwd=? where email=? and passwd=?
+_EOS_
+            @db.fetch(sql,_hash(new_passwd),email,_hash(old_passwd)).all
+            self.logout(ssid)
+            ssid=self.reg_session(email,client_ip)
+        end
+        @db.run('commit')
+
+        ssid
+    end
+
+    def update_member(old_email,
+                      new_email,
+                      name,
+                      phone,
+                      passwd,
+                      ssid)
+
+        old_email=old_email.to_s
+
+        new_email=new_email.to_s
+        return nil unless _validate_email(new_email)
+
+        name=name.to_s.strip
+        return nil if name.empty?
+
+        phone=NKF.nkf('-w -Z',phone.to_s).gsub('-','')
+        return nil unless phone=~/^\d+$/
+
+        passwd=passwd.to_s.strip
+
+        @db.run('begin')
+        sql=<<_EOS_
+select email from members where email=? and passwd=? limit 1
+_EOS_
+        data=@db.fetch(sql,old_email,_hash(passwd)).all[0]
+        unless(data)
+            @db.run('rollback')
+            return nil
+        end
+            
+        if(old_email==new_email)
+            sql=<<_EOS_
+update members set name=?, phone=? where email=? and passwd=?
+_EOS_
+            @db.fetch(sql,
+                      name,
+                      phone,
+                      old_email,
+                      _hash(passwd)).all[0]
+        else
+            sql=<<_EOS_
+update members set email=?, name=?, phone=? where email=? and passwd=?
+_EOS_
+            @db.fetch(sql,
+                      new_email,
+                      name,
+                      phone,
+                      old_email,
+                      _hash(passwd)).all[0]
+        end
+        self.update_session(ssid)
+        @db.run('commit')
+
+        ssid
+    end
+
     def reg_session(email,client_ip='')
         sql=<<_EOS_
 insert into sessions values (?,?,?)

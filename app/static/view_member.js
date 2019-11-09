@@ -2,7 +2,7 @@
 // view_member.js
 //
 //
-// Time-stamp: <2019-11-08 20:04:31 zophos>
+// Time-stamp: <2019-11-09 12:37:25 zophos>
 //
 
 View.prototype._setup=function()
@@ -41,7 +41,10 @@ View.prototype._setup=function()
 	var cal_id=`${y}${m}`
 	fetch(`./api/${cal_id}`,
 	      {credentials:'same-origin'}).then((response)=>{
+	      if(response.ok)
 		  return response.json();
+	      else
+		  return {};
 	      }).then((json)=>{
 		  Object.keys(json).forEach((k)=>{
 		      this.set_cell_content(k,json[k]);
@@ -90,6 +93,11 @@ View.prototype._setup=function()
     el.addEventListener('click',
 			(event)=>{
 			    this.draw_registorate_dialog.call(this);
+			});
+    var el=document.getElementById('do-edit');
+    el.addEventListener('click',
+			(event)=>{
+			    this.draw_update_passwd_dialog.call(this);
 			});
     var el=document.getElementById('do-logout');
     el.addEventListener('click',
@@ -192,6 +200,12 @@ View.prototype.draw_login_dialog=function()
 View.prototype.draw_registorate_dialog=function()
 {
     this._prepair_draw_dialog(this._registorate_html());
+
+    document.getElementById('email').value='';
+    document.getElementById('name').value='';
+    document.getElementById('phone').value='';
+    document.getElementById('password').value='';
+    document.getElementById('password2').value='';
 
     var el=document.getElementById('button-submit')
     el.addEventListener(
@@ -322,9 +336,14 @@ View.prototype.draw_submit_with_login_dialog=function(date,email='')
 	this._submit_with_login_html(this._build_date_str(date),
 				     email));
 
+    document.getElementById('name').value=''
+    document.getElementById('phone').value=''
+    document.getElementById('password').value=''
+    document.getElementById('password2').value=''
+
     if(email)
 	this._set_dialog_as_login();
-    else
+    else{
 	this._set_dialog_as_signup();
 
     var el=document.getElementById('dialog-tab-login');
@@ -340,7 +359,7 @@ View.prototype.draw_submit_with_login_dialog=function(date,email='')
 	    document.view._set_dialog_as_signup();
 	});
 
-    el=document.getElementById('button-submit')
+    el=document.getElementById('button-submit');
     el.addEventListener(
 	'click',
 	(event)=>{
@@ -399,7 +418,7 @@ View.prototype.draw_submit_with_login_dialog=function(date,email='')
 		  });
 	});
 
-    el=document.getElementById('button-cancel')
+    el=document.getElementById('button-cancel');
     el.addEventListener('click',
 			(event)=>{
 			    this.hide_dialog.call(this);
@@ -410,6 +429,112 @@ View.prototype.draw_submit_with_login_dialog=function(date,email='')
 			    this.hide_dialog.call(this);
 			});
 }
+View.prototype.draw_update_passwd_dialog=function()
+{
+    this._prepair_draw_dialog(this._update_passwd_html());
+    document.view._set_dialog_as_update_gecos();
+
+    var alive=true;
+    fetch('./api/member',
+	  {credentials:'same-origin'}).then((response)=>{
+	      if(response.ok)
+		  return response.json();
+	      else{
+		  document.cookie='ssid=; max-age=0';
+		  this.hide_dialog();
+		  alive=null;
+		  return {};
+	      }
+	  }).then((json)=>{
+	      var keys=Object.keys(json);
+	      if(keys.empty)
+		  return;
+
+	      keys.forEach((k)=>{
+		  var el=document.getElementById(k);
+		  if(!el || el.tagName!='INPUT')
+		      return;
+		  el.setAttribute('value',json[k]);
+	      });
+	  });
+
+    if(!alive)
+	return;
+    
+    var el=document.getElementById('dialog-tab-update-gecos');
+    el.addEventListener(
+	'click',
+	(event)=>{
+	    document.view._set_dialog_as_update_gecos();
+	});
+    el=document.getElementById('dialog-tab-update-passwd');
+    el.addEventListener(
+	'click',
+	(event)=>{
+	    document.view._set_dialog_as_update_passwd();
+	});
+
+    el=document.getElementById('button-submit');
+    el.addEventListener(
+	'click',
+	(event)=>{
+	    var passwd=document.getElementById('password').value;
+	    var email=null;
+	    var req_body={};
+	    if(document.getElementById('update-passwd').
+	       classList.contains('gecos')){
+		email=document.getElementById('email').value;
+		var name=document.getElementById('name').value;
+		var phone=document.getElementById('phone').value;
+		req_body={email:email,
+			  name:name,
+			  phone:phone,
+			  passwd:passwd};
+	    }
+	    else{
+		var new_passwd=document.getElementById('new-password').value;
+		var new_passwd2=document.getElementById('new-password2').value;
+
+		if(new_passwd!=new_passwd2){
+		    document.getElementById('login-message').innerText=
+			'パスワードが一致しません。';
+		    return;
+		}
+		req_body={passwd:passwd,
+			  new_passwd:new_passwd};
+	    }
+	    fetch("./api/member",
+		  {method:'PATCH',
+		   headers:new Headers({'Accept':'application/json',
+					'Content-Type':'application/json'}),
+		   body:JSON.stringify(req_body)
+		  }).then((response)=>{
+		      var message=null;
+		      if(response.ok){
+			  if(email)
+			      localStorage.setItem('email',email);
+			  this.hide_dialog();
+			  this.draw_updated_dialog();
+		      }
+		      else{
+		      document.getElementById('login-message').innerText=
+			  '更新できませんでした。';
+		      }
+		  });
+	    });
+
+    el=document.getElementById('button-cancel');
+    el.addEventListener('click',
+			(event)=>{
+			    this.hide_dialog.call(this);
+			});
+    el=document.getElementById('button-close')
+    el.addEventListener('click',
+			(event)=>{
+			    this.hide_dialog.call(this);
+			});
+}
+
 View.prototype.draw_accepted_dialog=function()
 {
     this._prepair_draw_dialog(this._accepted_html());
@@ -430,6 +555,21 @@ View.prototype.draw_accepted_dialog=function()
 View.prototype.draw_deleted_dialog=function()
 {
     this._prepair_draw_dialog(this._deleted_html());
+
+    var el=document.getElementById('button-cancel')
+    el.addEventListener('click',
+			(event)=>{
+			    this.hide_dialog.call(this);
+			});
+    el=document.getElementById('button-close')
+    el.addEventListener('click',
+			(event)=>{
+			    this.hide_dialog.call(this);
+			});
+}
+View.prototype.draw_updated_dialog=function()
+{
+    this._prepair_draw_dialog(this._updated_html());
 
     var el=document.getElementById('button-cancel')
     el.addEventListener('click',
@@ -538,16 +678,16 @@ View.prototype._submit_with_login_html=function(date,email='')
 <li class='tab' id='dialog-tab-signup'>新規代表者登録</li>
 </ul>
 <dl class='tab' id='login-or-signup'>
-<dt class='name'>氏名</dt>
-<dd class='name'><input class='input' id='name'></input></dd>
+<dt class='name signup'>氏名</dt>
+<dd class='name signup'><input class='input signup' id='name'></input></dd>
 <dt>メールアドレス</dt>
 <dd><input class='input' id='email' value='${email}' required='required'></input></dd>
-<dt class='phone'>電話番号</dt>
-<dd class='phone'><input class='input' id='phone' pattern='^[0-9\-]+$'></input></dd>
+<dt class='phone signup'>電話番号</dt>
+<dd class='phone signup'><input class='input signup' id='phone' pattern='^[0-9\-]+$'></input></dd>
 <dt>パスワード</dt>
 <dd><input class='input' id='password' type='password' required='required'></input></dd>
-<dt class='password2'>パスワード確認</dt>
-<dd class='password2'><input class='input' id='password2' type='password'></input></dd>
+<dt class='password2 signup'>パスワード確認</dt>
+<dd class='password2 signup'><input class='input signup' id='password2' type='password'></input></dd>
 </dl>
 <p id='login-message'></p>
 <p class='buttons'>
@@ -557,7 +697,39 @@ View.prototype._submit_with_login_html=function(date,email='')
 </div>
 `;
 }
-View.prototype._accepted_html=function(date,email='')
+View.prototype._update_passwd_html=function()
+{
+    return `
+<div class='dialog' id='update-passwd-dialog'>
+<p class='dialog-header'><i id='button-close' class="fas fa-times-circle"></i></p>
+<h2>登録変更</h2>
+<ul class='tab'>
+<li class='tab on' id='dialog-tab-update-gecos'>代表者情報の変更</li>
+<li class='tab' id='dialog-tab-update-passwd'>パスワード変更</li>
+</ul>
+<dl class='tab gecos' id='update-passwd'>
+<dt class='gecos'>氏名</dt>
+<dd class='gecos'><input class='input gecos' id='name'></input></dd>
+<dt class='gecos'>メールアドレス</dt>
+<dd class='gecos'><input class='input gecos' id='email'></input></dd>
+<dt class='gecos'>電話番号</dt>
+<dd class='gecos'><input class='input gecos' id='phone' pattern='^[0-9\-]+$'></input></dd>
+<dt>現在のパスワード</dt>
+<dd><input class='input' id='password' type='password' required='required'></input></dd>
+<dt class='passwd'>新規パスワード</dt>
+<dd class='passwd'><input class='input passwd' id='new-password' type='password'></input></dd>
+<dt class='passwd'>新規パスワード確認</dt>
+<dd class='passwd'><input class='input passwd' id='new-password2' type='password'></input></dd>
+</dl>
+<p id='login-message'></p>
+<p class='buttons'>
+<input class='button' id='button-submit' type='button' value='送信'></input>
+<input class='button' id='button-cancel' type='button' value='キャンセル'></input>
+</p>
+</div>
+`;
+}
+View.prototype._accepted_html=function()
 {
     return `
 <div class='dialog'>
@@ -571,14 +743,26 @@ View.prototype._accepted_html=function(date,email='')
 </div>
 `;
 }
-View.prototype._deleted_html=function(date,email='')
+View.prototype._deleted_html=function()
 {
     return `
 <div class='dialog'>
 <p class='dialog-header'><i id='button-close' class="fas fa-times-circle"></i></p>
 <h2>削除しました</h2>
 <p class='buttons'>
-<input class='button' id='button-cancel' type='button' value='確認'></input>
+<input class='button' id='button-cancel' type='button' value='閉じる'></input>
+</p>
+</div>
+`;
+}
+View.prototype._updated_html=function()
+{
+    return `
+<div class='dialog'>
+<p class='dialog-header'><i id='button-close' class="fas fa-times-circle"></i></p>
+<h2>更新しました</h2>
+<p class='buttons'>
+<input class='button' id='button-cancel' type='button' value='閉じる'></input>
 </p>
 </div>
 `;
@@ -596,6 +780,13 @@ View.prototype._set_dialog_as_login=function()
     el.classList.remove('signup');
     el.classList.add('login');
 
+    var collection=document.getElementById('login-or-signup').
+	getElementsByTagName('input');
+    for(var i=0;i<collection.length;i++){
+	if(collection[i].classList.contains('signup'))
+	    collection[i].removeAttribute('required')
+    }
+
     this._submit_with_signup=false;
 }
 View.prototype._set_dialog_as_signup=function()
@@ -610,7 +801,65 @@ View.prototype._set_dialog_as_signup=function()
     el.classList.remove('login');
     el.classList.add('signup');
 
+    var collection=document.getElementById('login-or-signup').
+	getElementsByTagName('input');
+    for(var i=0;i<collection.length;i++){
+	if(collection[i].classList.contains('signup'))
+	    collection[i].setAttribute('required','required')
+    }
+
     this._submit_with_signup=true;
+}
+
+View.prototype._set_dialog_as_update_gecos=function()
+{
+    document.getElementById('password').value='';
+    document.getElementById('new-password').value='';
+    document.getElementById('new-password2').value='';
+
+    var el=document.getElementById('dialog-tab-update-gecos');
+    if(!el)
+	return;
+    el.classList.add('on');
+    el=document.getElementById('dialog-tab-update-passwd');
+    el.classList.remove('on');
+    el=document.getElementById('update-passwd');
+    el.classList.add('gecos');
+    el.classList.remove('passwd');
+
+    var collection=el.getElementsByTagName('input');
+    for(var i=0;i<collection.length;i++){
+	var clist=collection[i].classList;
+	if(clist.contains('gecos'))
+	    collection[i].setAttribute('required','required');
+	else if(clist.contains('passwd'))
+	    collection[i].removeAttribute('required');
+    }
+}
+View.prototype._set_dialog_as_update_passwd=function()
+{
+    document.getElementById('password').value='';
+    document.getElementById('new-password').value='';
+    document.getElementById('new-password2').value='';
+
+    var el=document.getElementById('dialog-tab-update-passwd');
+    if(!el)
+	return;
+    el.classList.add('on');
+    el=document.getElementById('dialog-tab-update-gecos');
+    el.classList.remove('on');
+    el=document.getElementById('update-passwd');
+    el.classList.remove('gecos');
+    el.classList.add('passwd');
+
+    var collection=el.getElementsByTagName('input');
+    for(var i=0;i<collection.length;i++){
+	var clist=collection[i].classList;
+	if(clist.contains('passwd'))
+	    collection[i].setAttribute('required','required');
+	else if(clist.contains('gecos'))
+	    collection[i].removeAttribute('required');
+    }
 }
 
 window.onload=function(){

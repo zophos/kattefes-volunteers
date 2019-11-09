@@ -2,7 +2,7 @@
 // Copyright (c) 2019 New Year KATTE FESTIVAL office. All Rights Reserved.
 // kattefes@officebarbecue.jp
 //
-// Time-stamp: "2019-11-08 21:53:08 zophos"
+// Time-stamp: "2019-11-09 12:27:05 zophos"
 */
 html,
 body{
@@ -29,7 +29,7 @@ h1{
 }
 #login-ctrl.loggedin #do-login,
 #login-ctrl.loggedin #do-signup,
-#do-edit,
+#login-ctrl.loggedout #do-edit,
 #login-ctrl.loggedout #do-logout{
     display:none;
 }
@@ -327,9 +327,9 @@ p.dialog-header i:hover{
     border:solid 2px rgba(120,120,120,0.75);
     border-radius:10px;
 }
-#overray .dialog dl.login .name,
-#overray .dialog dl.login .phone,
-#overray .dialog dl.login .password2
+#overray .dialog dl.login .signup,
+#overray .dialog dl.gecos .passwd,
+#overray .dialog dl.passwd .gecos
 {
     display:none;
 }

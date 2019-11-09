@@ -9,7 +9,7 @@ Process.setproctitle('sinatra-app')
 
 require 'sinatra'
 require 'sinatra/cookies'
-#require 'sinatra/reloader'
+require 'sinatra/reloader'
 require 'json'
 require 'net/smtp'
 require 'tilt/erb'
@@ -95,6 +95,19 @@ helpers do
                                 settings.http_auth_pass]
     end
 
+    def set_cookie(ssid)
+        response.set_cookie :ssid,{:value => ssid,
+                                   :max_age => "#{DB::SESSION_EXPIRE_SEC}",
+                                   :path=>"#{settings.mount_point}/",
+                                   :secure=>settings.is_secure}
+    end
+    def unset_cookie
+        response.set_cookie :ssid,{:value=>"",
+                                   :max_age=>"0",
+                                   :path=>"#{settings.mount_point}/",
+                                   :secure=>settings.is_secure}
+    end
+
     def format_date(date)
         m=/(\d{4})(\d{2})(\d{2})/.match(date)
         Time.new(m[1],m[2],m[3]).strftime("%Y/%m/%d/ (%a.)")
@@ -124,10 +137,7 @@ post "#{settings.mount_point}/api/login" do
     params=JSON.parse(request.body.read)
     ssid=db.login(params['email'],params['passwd'],request.ip)
     if(ssid)
-        response.set_cookie :ssid,{:value=>ssid,
-                                   :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>"#{settings.mount_point}/",
-                                   :secure=>settings.is_secure}
+        set_cookie(ssid)
         return 200
     else
         sleep(3)
@@ -137,12 +147,7 @@ end
 
 get "#{settings.mount_point}/api/logout" do
     db.logout(cookies[:ssid])
-    if(cookies[:ssid])
-        response.set_cookie :ssid,{:value=>"",
-                                   :max_age=>"0",
-                                   :path=>"#{settings.mount_point}/",
-                                   :secure=>settings.is_secure}
-    end
+    unset_cookie if cookies[:ssid]
 
     return 200
 end
@@ -151,10 +156,7 @@ post "#{settings.mount_point}/api/ssid" do
     params=JSON.parse(request.body.read)
     ssid=db.validate_session(cookies[:ssid],params['email'])
     if(ssid)
-        response.set_cookie :ssid,{:value=>ssid,
-                                   :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>"#{settings.mount_point}/",
-                                   :secure=>settings.is_secure}
+        set_cookie(ssid)
         return 200
     else
         sleep(3)
@@ -173,6 +175,23 @@ get '/api/reset' do
 end
 =end
 
+get "#{settings.mount_point}/api/member" do
+    _db=db
+    email=_db.ssid2email(cookies[:ssid])
+    unless(email)
+        sleep(3)
+        return 403
+    end
+    data=_db.email2memberinfo(email)
+    unless(data)
+        sleep(3)
+        return 404
+    end
+
+    content_type :json
+    JSON.dump(data)+"\n"
+end
+
 post "#{settings.mount_point}/api/member" do
     params=JSON.parse(request.body.read)
 
@@ -187,10 +206,45 @@ post "#{settings.mount_point}/api/member" do
                        params['passwd'],
                        request.ip)
     if(ssid)
-        response.set_cookie :ssid,{:value => ssid,
-                                   :max_age => "#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>"#{settings.mount_point}/",
-                                   :secure=>settings.is_secure}
+        set_cookie(ssid)
+        return 200
+    else
+        sleep(3)
+        return 409
+    end
+end
+
+patch "#{settings.mount_point}/api/member" do
+    _db=db
+    email=_db.ssid2email(cookies[:ssid])
+    unless(email)
+        sleep(3)
+        return 403
+    end
+
+    params=JSON.parse(request.body.read)
+    keys=params.keys
+
+    ssid=if(keys.include?('new_passwd'))
+             _db.update_passwd(email,
+                               params['passwd'],
+                               params['new_passwd'],
+                               cookies[:ssid],
+                               request.ip)
+         else
+             ['email','name','phone','passwd'].each{|k|
+                 return 400 unless keys.include?(k)
+             }
+             _db.update_member(email,
+                               params['email'],
+                               params['name'],
+                               params['phone'],
+                               params['passwd'],
+                               cookies[:ssid])
+         end
+
+    if(ssid)
+        set_cookie(ssid)
         return 200
     else
         sleep(3)
@@ -206,10 +260,7 @@ get "#{settings.mount_point}/api/:cal_id" do
     return 400 unless data
 
     if(cookies[:ssid] && _db.ssid2email(cookies[:ssid]))
-        response.set_cookie :ssid,{:value=>cookies[:ssid],
-                                   :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                                   :path=>"#{settings.mount_point}/",
-                                   :secure=>settings.is_secure}
+        set_cookie(cookies[:ssid])
     end
 
     content_type :json
@@ -282,10 +333,7 @@ post "#{settings.mount_point}/api/:cal_id" do
 
     return 400 unless data
 
-    response.set_cookie :ssid,{:value=>ssid,
-                               :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                               :path=>"#{settings.mount_point}/",
-                               :secure=>settings.is_secure}
+    set_cookie(ssid)
 
     content_type :json
     JSON.dump(data)
@@ -319,10 +367,7 @@ delete "#{settings.mount_point}api/:cal_id" do
         return 400
     end
 
-    response.set_cookie :ssid,{:value=>ssid,
-                               :max_age=>"#{DB::SESSION_EXPIRE_SEC}",
-                               :path=>"#{settings.mount_point}/",
-                               :secure=>settings.is_secure}
+    set_cookie(ssid)
     content_type :json
     JSON.dump(data)
 end
