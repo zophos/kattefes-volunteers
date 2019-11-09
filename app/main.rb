@@ -9,7 +9,7 @@ Process.setproctitle('sinatra-app')
 
 require 'sinatra'
 require 'sinatra/cookies'
-require 'sinatra/reloader'
+#require 'sinatra/reloader'
 require 'json'
 require 'net/smtp'
 require 'tilt/erb'
