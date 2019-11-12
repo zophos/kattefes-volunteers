@@ -2,7 +2,7 @@
 // view_member.js
 //
 //
-// Time-stamp: <2019-11-09 12:45:17 zophos>
+// Time-stamp: <2019-11-12 20:15:56 zophos>
 //
 
 View.prototype._setup=function()
@@ -77,10 +77,15 @@ View.prototype._setup=function()
 	}
 
 	if(window.location.search ||
-	   year!=this.today.getFullYear() ||
-	   month!=this.today.getMonth()){
+	   (this.today && (
+	       year!=this.today.getFullYear() ||
+		   month!=this.today.getMonth()))){
+	    if(!y)
+		y=(year||this.today.getFullYear());
+	    if(!m)
+		m=('0'+((month||this.today.getMonth())+1)).slice(-2);
 	    var q=`?${y}${m}`;
-	    history.replaceState('','',q);
+	    history.replaceState(null,null,q);
 	}
     }
 

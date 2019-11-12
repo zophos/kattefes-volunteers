@@ -2,7 +2,7 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-11-04 18:24:54 zophos>
+// Time-stamp: <2019-11-12 20:16:41 zophos>
 //
 
 View.prototype._setup=function()
@@ -51,8 +51,13 @@ View.prototype._setup=function()
 	}
 
 	if(window.location.search ||
-	   year!=this.today.getFullYear() ||
-	   month!=this.today.getMonth()){
+	   (this.today && (
+	       year!=this.today.getFullYear() ||
+		   month!=this.today.getMonth()))){
+	    if(!y)
+		y=(year||this.today.getFullYear());
+	    if(!m)
+		m=('0'+((month||this.today.getMonth())+1)).slice(-2);
 	    var q=`?${y}${m}`;
 	    history.replaceState('','',q);
 
