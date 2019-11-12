@@ -2,7 +2,7 @@
 // view_common.js
 //
 //
-// Time-stamp: <2019-11-08 16:02:50 zophos>
+// Time-stamp: <2019-11-12 18:35:41 zophos>
 //
 
 String.prototype.escapeHTML=function()
@@ -44,6 +44,28 @@ var onVisibilityChange=(()=>{
 
 function View()
 {
+    var not_support=null;
+    //
+    // test arrow function
+    //
+    try{
+	[0].map(()=>{return 0});
+    }
+    catch(e){
+	not_support=true;
+    }
+    
+    //
+    // test addEventListner
+    //
+    if(typeof(document.addEventListener)!='function')
+	not_support=true;
+
+    if(not_support){
+	this._prepair_draw_dialog(this._not_supported_html());
+	return;
+    }
+
     this._RELOAD_DURATION=300000; // 5min
     this._reload_timer=null;
 
@@ -141,4 +163,15 @@ View.prototype._split_queries=function()
     })
 
     return ret;
+}
+View.prototype._not_supported_html=function()
+{
+    return `
+<div class='dialog'>
+<div id='dialog-body'>
+<p>ご使用中のブラウザでは本システムは動作しません。<br />
+参加登録はお手数ですがメールにて<a href='mailto:kattefes@officebarbecue.jp'>ニューイヤー勝手フェスティバル事務局</a>までお願いします。</p>
+</div>
+</div>
+`;
 }
