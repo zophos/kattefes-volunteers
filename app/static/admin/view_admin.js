@@ -2,7 +2,7 @@
 // admin.js
 //
 //
-// Time-stamp: <2019-11-12 20:16:41 zophos>
+// Time-stamp: <2019-11-12 20:44:34 zophos>
 //
 
 View.prototype._setup=function()
@@ -17,6 +17,11 @@ View.prototype._setup=function()
 	    clearTimeout(document.view._reload_timer);
 	    document.view._reload_timer=null;
 	}
+
+	if((!year) || isNaN(year))
+	    year=this.today.getFullYear();
+	if((!month) || isNaN(month))
+	    month=this.today.getMonth();
 
 	var y=year;
 	var m=('0'+(month+1)).slice(-2);
@@ -51,15 +56,10 @@ View.prototype._setup=function()
 	}
 
 	if(window.location.search ||
-	   (this.today && (
-	       year!=this.today.getFullYear() ||
-		   month!=this.today.getMonth()))){
-	    if(!y)
-		y=(year||this.today.getFullYear());
-	    if(!m)
-		m=('0'+((month||this.today.getMonth())+1)).slice(-2);
+	   year!=this.today.getFullYear() ||
+	   month!=this.today.getMonth()){
 	    var q=`?${y}${m}`;
-	    history.replaceState('','',q);
+	    history.replaceState(null,null,q);
 
 	    document.getElementById('do-logout').href='../'+q;
 	}
