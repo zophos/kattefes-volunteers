@@ -2,7 +2,7 @@
 // view_member.js
 //
 //
-// Time-stamp: <2019-11-12 20:43:13 zophos>
+// Time-stamp: <2019-12-11 17:11:47 zophos>
 //
 
 View.prototype._setup=function()
@@ -35,9 +35,9 @@ View.prototype._setup=function()
 	    document.view._reload_timer=null;
 	}
 
-	if((!year) || isNaN(year))
+	if((year==null)||isNaN(year))
 	    year=this.today.getFullYear();
-	if((!month) || isNaN(month))
+	if((month==null)||isNaN(month))
 	    month=this.today.getMonth();
 
 	var y=year;
