@@ -26,6 +26,7 @@ That's all ;-P
    + sinatra-contrib
    + sqlite3 (require built with --with-sqlcipher option for encrypted database)
    + sequel
+ + HTML5/CSS3/ECMAScript6 full supported web browser for client (latest Chrome, Firefox, Safari are suitable. Does NOT work well with all versions of IE and older safari (< 10))
 
 ## Run
 
