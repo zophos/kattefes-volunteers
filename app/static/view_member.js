@@ -2,7 +2,7 @@
 // view_member.js
 //
 //
-// Time-stamp: <2019-12-11 17:11:47 zophos>
+// Time-stamp: <2019-12-21 16:04:32 zophos>
 //
 
 View.prototype._setup=function()
@@ -654,6 +654,7 @@ View.prototype._submit_html=function(date,number,note)
 <dd class='note'><input class='input' id='note' value='${note.escapeHTML()}'></input></dd>
 <dd class='withdraw'><input class='button' id='button-withdraw' type='button' value='参加取り消し'></input>
 </dl>
+<p id='entry-notice'>※ 事務処理の都合上，高速道路を経由してお越しになる場合には備考欄にその旨ご記入願います。</p>
 <p id='login-message'></p>
 <p class='buttons'>
 <input class='button' id='button-submit' type='button' value='送信'></input>
@@ -678,6 +679,7 @@ View.prototype._submit_with_login_html=function(date,email='')
 <dt class='note'>備考</dt>
 <dd class='note'><input class='input' id='note'></input></dd>
 </dl>
+<p id='entry-notice'>※ 事務処理の都合上，高速道路を経由してお越しになる場合には備考欄にその旨ご記入願います。</p>
 <ul class='tab'>
 <li class='tab on' id='dialog-tab-login'>ログイン</li>
 <li class='tab' id='dialog-tab-signup'>新規代表者登録</li>
